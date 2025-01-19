@@ -1,4 +1,5 @@
 from flask import Flask,render_template,redirect,url_for,request,session,flash
+from tools import commandinj 
 flask_app=Flask(__name__)
 
 flask_app.secret_key="hello"
