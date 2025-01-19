@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VulnScanX - Web Vulnerability Scanner</title>
+  <link rel="stylesheet" href="../static/css/style2.css">
+</head>
+<body>
+  <!-- Header -->
+  <header>
+    <div class="container">
+      <h1>VulnScanX</h1>
+      <p>Your go-to tool for detecting web vulnerabilities.</p>
+    </div>
+  </header>
+
+  <!-- Input Section -->
+  <section class="input-section">
+    <div class="container">
+      <h2>Scan a Website</h2>
+      <form id="scan-form">
+        <label for="url">Enter URL:</label>
+        <input type="url" id="url" name="url" placeholder="https://example.com" required>
+        
+        <label for="scan-type">Scan Type:</label>
+        <select id="scan-type" name="scan-type">
+          <option value="quick">Quick Scan</option>
+          <option value="full">Full Scan</option>
+          <option value="custom">Custom Scan</option>
+        </select>
+
+        <button type="submit">Start Scan</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- Scan Results Section -->
+  <section class="results-section">
+    <div class="container">
+      <h2>Scan Results</h2>
+      <table id="results-table">
+        <thead>
+          <tr>
+            <th>Vulnerability</th>
+            <th>Severity</th>
+            <th>Description</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Results will be dynamically populated here -->
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <p>&copy; 2023 VulnScanX. All rights reserved.</p>
+      <nav>
+        <a href="#">Documentation</a>
+        <a href="#">About</a>
+        <a href="#">Contact</a>
+      </nav>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
