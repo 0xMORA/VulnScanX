@@ -36,6 +36,7 @@ def run_commix_on_urls(url_file):
             else:
                 # Extract vulnerabilities and payloads
                 vulnerabilities = []
+                payloads = []
 
                 for line in result.stdout.splitlines():
                     # Extract vulnerable parameters
@@ -44,18 +45,20 @@ def run_commix_on_urls(url_file):
                         if match:
                             vulnerabilities.append({
                                 "parameter": match.group(1),
+                                "status": "Vulnerable"
                             })
 
                     # Extract payloads
                     if "Payload" in line:
                         match = re.search(r"Payload : (.+)", line)
                         if match:
-                            vulnerabilities.append(match.group(1))
+                            payloads.append(match.group(1))
 
                 # Add the results for this URL
                 results.append({
                     "url": url,
                     "vulnerabilities": vulnerabilities,
+                    "payloads": payloads
                 })
 
         # Convert the results to JSON
@@ -64,5 +67,4 @@ def run_commix_on_urls(url_file):
 
     except Exception as e:
         return json.dumps({"error": str(e)}, indent=4)
-
 
