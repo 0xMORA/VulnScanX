@@ -17,9 +17,8 @@ VulnScanX is a **web vulnerability scanner** designed to help developers and sec
 ## Technologies Used
 
 - **Frontend**: HTML, CSS, JavaScript
-- **Backend**: Python (Flask/Django) or Node.js (Express)
+- **Backend**: Python (Flask)
 - **Database**: SQLite/MySQL/PostgreSQL (for storing scan results)
-- **Libraries**: `requests`, `BeautifulSoup`, `sqlmap` (for vulnerability detection)
 - **Tools**: Git, Docker (optional for containerization)
 
 ---
@@ -27,7 +26,8 @@ VulnScanX is a **web vulnerability scanner** designed to help developers and sec
 ## Installation
 
 ### Prerequisites
-- Python 3.x or Node.js
+- Python 3.x
+- FLASK
 - Git
 - A modern web browser
 
@@ -36,3 +36,5 @@ VulnScanX is a **web vulnerability scanner** designed to help developers and sec
    ```bash
    git clone https://github.com/your-username/VulnScanX.git
    cd VulnScanX
+   chmod +x setup.sh
+   ./setup.sh
