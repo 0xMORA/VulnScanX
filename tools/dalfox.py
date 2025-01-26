@@ -3,7 +3,7 @@ import re
 import json
 import urllib.parse
 from urllib.parse import urlparse, parse_qs
-#dalfox outputs the poc only so i decoded the payload
+#dalfox outputs the POC only so we decoded the payload
 
 def run_dalfox_on_url(url_file):
     command = ["dalfox", "file", url_file]
