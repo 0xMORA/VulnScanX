@@ -2,17 +2,14 @@ import subprocess
 import json
 import re
 
-async def run_commix_on_urls(url_file,ws):
+def commandinjection(url_file, ws=None):
     """
-    Run Commix on a list of URLs, extract payloads, and convert results to JSON.
+    Run Commix on a list of URLs, extract parameters and payloads, and send results as JSON with WebSocket.
     """
     try:
         # Read URLs from the file
         with open(url_file, "r") as f:
             urls = f.readlines()
-
-        # Store results for all URLs
-        results = []
 
         # Iterate through each URL
         for url in urls:
@@ -26,45 +23,54 @@ async def run_commix_on_urls(url_file,ws):
             command = ["commix", "--url", url, "--batch"]
             result = subprocess.run(command, capture_output=True, text=True)
 
-            # Check if the process completed successfully
+            # Prepare the result data
             if result.returncode != 0:
                 print(f"Error testing {url}: {result.stderr}")
-                results.append({
-                    "url": url,
-                    "error": result.stderr
-                })
+                if ws:
+                    # Send an error as a vulnerability with a description
+                     ws.send(json.dumps({
+                        "vulnerability": "Command Injection",
+                        "severity": "Critical",
+                        "url": url,
+                        "description": f"Error encountered: {result.stderr}"
+                    }))
             else:
-                # Extract vulnerabilities and payloads
-                vulnerabilities = []
-                payloads = []
+                # Extract parameters and payloads
+                parameter_payload_pairs = []
 
                 for line in result.stdout.splitlines():
                     # Extract vulnerable parameters
                     if "injectable" in line:
-                        match = re.search(r"Parameter '(.+?)' seems injectable", line)
-                        if match:
-                            vulnerabilities.append({
-                                "parameter": match.group(1),
-                                "status": "Vulnerable"
-                            })
+                        param_match = re.search(r"Parameter '(.+?)' seems injectable", line)
+                        if param_match:
+                            parameter = param_match.group(1)
 
-                    # Extract payloads
-                    if "Payload" in line:
-                        match = re.search(r"Payload : (.+)", line)
-                        if match:
-                            payloads.append(match.group(1))
+                            # Look for a payload on the following lines
+                            payload_match = re.search(r"Payload : (.+)", line)
+                            payload = payload_match.group(1) if payload_match else "N/A"
 
-                # Add the results for this URL
-                results.append({
-                    "url": url,
-                    "vulnerabilities": vulnerabilities,
-                    "payloads": payloads
-                })
+                            # Add the parameter-payload pair to the list
+                            parameter_payload_pairs.append((parameter, payload))
 
-        # Convert the results to JSON
-        json_output = json.dumps(results, indent=4)
-        return json_output
+                # If parameter-payload pairs are found, send them as results
+                if parameter_payload_pairs:
+                    description = "\n".join([f"Parameter: {param}, Payload: {payload}" for param, payload in parameter_payload_pairs])
+                    result_data = {
+                        "vulnerability": "Command Injection",
+                        "severity": "Critical",  # Fixed severity for command injection
+                        "url": url,
+                        "description": description
+                    }
+                    if ws:
+                         ws.send(json.dumps(result_data))
 
     except Exception as e:
-        return json.dumps({"error": str(e)}, indent=4)
-
+        error_data = {
+            "vulnerability": "Command Injection",
+            "severity": "Critical",
+            "url": "N/A",
+            "description": f"Error: {str(e)}"
+        }
+        if ws:
+             ws.send(json.dumps(error_data))
+        return json.dumps(error_data, indent=4)
