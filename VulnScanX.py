@@ -1,9 +1,8 @@
 from flask import Flask, jsonify,render_template,redirect,url_for,request,session,flash
 import subprocess
-import asyncio
 import json
-from tools import commandinj
-
+from tools import commandinj,xss,sqli
+from flask_sockets import Sockets
 
 flask_app=Flask(__name__)
 
@@ -13,39 +12,85 @@ flask_app.secret_key="hello"
 #homepage
 @flask_app.route("/",methods=["GET","POST"])
 def home():
-        if request.method=="GET":
             return render_template("index.html",
-                                title="/",
-                                custom_css="home",
-                                custom_script="home",)
-        elif request.method=="POST":
-            url=request.form["url"]
-            scan_type=request.form["scan-type"]
-            subdomaincheck=request.form["Include subdomains"]
-            results = asyncio.run(run_scan_concurrently(url,scan_type,subdomaincheck))
-            return jsonify(results)
-        else:
-            flash("method not allowed")
-
+                                title="/")
         
 
-#scan function that calls all tools and other functions 
-async def run_scan_concurrently(url,scan_type,subdomaincheck):
-    recon(url,subdomaincheck)
-    tasks = [commandinj("/path/to/urls")]
-    results = await asyncio.gather(*tasks)
-    return results
-     
+
+#start-scan
+@flask_app.route("/start-scan",methods=["POST"])
+def start_scan():
+        if request.method=="POST":
+            url=request.form["url"]
+            headers=request.form["headers"]
+            scan_type=request.form["scan-type"]
+            if scan_type == "Full Scan":
+                full_scan(url,headers)
+            elif scan_type == "Custom Scan":
+                subdomain_enum=request.form["Subdomain Enumeration"]
+                crawling=request.form["Crawling"]
+                xss=request.form["XSS"]
+                sqli=request.form["SQL Injection"]
+                commandinj=request.form["Command Injection"]
+                custom_scan(url,headers,subdomain_enum,crawling,xss,sqli,commandinj)
+            else:
+                flash("Invalid scan type")
+                return redirect(url_for("home"))
+
+        return "Scan initiated."
+
+#results
+@flask_app.route("/results",methods=["GET","POST"])
+def results():
+            return render_template("results.html",
+                                title="/results")
+
+
+
+def full_scan(url,headers):
+    subdomain_enum=True
+    crawling=True
+    recon(url,subdomain_enum,crawling)
+    xss()
+    commandinj()
+    sqli()
+
+
+
+def custom_scan(url,headers,subdomain_enum,crawling,xss,sqli,commandinj):
+
+    if(subdomain_enum | crawling):
+        recon(url,subdomain_enum,crawling)
+
+    if(xss):
+        xss()
+    if(commandinj):
+        commandinj()
+    if(sqli):
+        sqli()
+
+
 #recon function is a bash script that automates subdomain enum & passive and active crawling     
-def recon(url,subdomaincheck):
+def recon(url,subdomain_enum,crawling):
     try:
+        if (subdomain_enum):
+            sub="-sub"
+        else:
+            sub=""
+
+        if(crawling):
+            crawl="-crawl"
+        else:
+            crawl=""
+
         # Run the bash script
         result = subprocess.run(
-            ["/tools/automate.sh"] + url +subdomaincheck,  # Path to the bash script
+            ["/tools/automate.sh"] + url +subdomain_enum +crawl,  # Path to the bash script
             capture_output=True,  # Capture stdout and stderr
             text=True,            # Return output as a string
             check=True            # Raise an error if the script fails
         )
+            
     except subprocess.CalledProcessError as e:
         # Handle errors (e.g., script returns a non-zero exit code)
         return {
@@ -54,6 +99,8 @@ def recon(url,subdomaincheck):
             "stderr": e.stderr,
             "returncode": e.returncode
         }    
+
+
 
 
 if __name__=="__main__":

@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>VulnScanX - Web Vulnerability Scanner</title>
-  <link rel="stylesheet" href="../static/css/style2.css">
+  <link rel="stylesheet" href="../static/css/style.css">
 </head>
 <body>
   <!-- Header -->
@@ -24,38 +24,42 @@
         <input type="url" id="url" name="url" placeholder="https://example.com" required>
         
         <label for="scan-type">Scan Type:</label>
-        <select id="scan-type" name="scan-type">
-          <option value="quick">Quick Scan</option>
+        <select id="scan-type" name="scan-type" onchange="toggleCustomOptions()">
           <option value="full">Full Scan</option>
           <option value="custom">Custom Scan</option>
         </select>
-        <label for="scan-type">Include subdomains:</label>
-        <select id="scan-type" name="Include subdomains">
-          <option value="Yes">Yes</option>
-          <option value="No">No</option>
-        </select>
+
+        <!-- Custom Scan Options -->
+        <div id="custom-scan-options" style="display: none;">
+          <label>Custom Scan Options:</label>
+          <div>
+            <input type="checkbox" id="subdomain-enum" name="subdomain-enum">
+            <label for="subdomain-enum">Subdomain Enumeration</label>
+          </div>
+          <div>
+            <input type="checkbox" id="crawling" name="crawling">
+            <label for="crawling">Crawling</label>
+          </div>
+          <div>
+            <input type="checkbox" id="xss" name="xss">
+            <label for="xss">XSS</label>
+          </div>
+          <div>
+            <input type="checkbox" id="sql-injection" name="sql-injection">
+            <label for="sql-injection">SQL Injection</label>
+          </div>
+          <div>
+            <input type="checkbox" id="command-injection" name="command-injection">
+            <label for="command-injection">Command Injection</label>
+          </div>
+        </div>
+
+        <!-- Headers Input -->
+        <label for="headers">Headers (e.g., Cookies):</label>
+        <textarea id="headers" name="headers" placeholder="Enter headers like cookies here"></textarea>
+
         <button type="submit">Start Scan</button>
       </form>
-    </div>
-  </section>
-
-  <!-- Scan Results Section -->
-  <section class="results-section">
-    <div class="container">
-      <h2>Scan Results</h2>
-      <table id="results-table">
-        <thead>
-          <tr>
-            <th>Vulnerability</th>
-            <th>Severity</th>
-            <th>Description</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- Results will be dynamically populated here -->
-        </tbody>
-      </table>
     </div>
   </section>
 
@@ -71,6 +75,18 @@
     </div>
   </footer>
 
+  <script>
+    function toggleCustomOptions() {
+      const scanType = document.getElementById('scan-type').value;
+      const customOptions = document.getElementById('custom-scan-options');
+
+      if (scanType === 'custom') {
+        customOptions.style.display = 'block';
+      } else {
+        customOptions.style.display = 'none';
+      }
+    }
+  </script>
   <script src="../static/js/script.js"></script>
 </body>
 </html>
