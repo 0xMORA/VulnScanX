@@ -3,7 +3,7 @@ import re
 import json
 
 
-def sql_injection_test(file_path):
+def sql_injection_test(file_path,cookies="",level="",risk="",request_file=""):
     results = []
     command = ["sqlmap",
                "--flush-session",
@@ -12,8 +12,16 @@ def sql_injection_test(file_path):
                "--batch",
                "--answers=Do you want to skip further tests involving it?=N",
                "-v",
-               "0"
+               "0",
                ]
+    if cookies:
+        command.extend(["--cookie",cookies])
+    if level:
+        command.extend(["--level",level])
+    if risk:
+        command.extend(["--risk",risk])
+    if request_file:
+        command.extend(["-r",request_file])
     
     try:
         
@@ -25,15 +33,12 @@ def sql_injection_test(file_path):
         result = subprocess.run(command, capture_output=True, text=True)
         outputs = re.findall(r"---\s*(.*?)\s*---|ERROR",result.stdout,re.DOTALL)
         outputs = [output.strip() for output in outputs]
-        for output in outputs:
-            print("===")
-            print(output)
         index = 0
         for output in outputs:
             if output == "":
                 json_output={
                     "url":urls[index],
-                    "Vulnerable to SQL Injection": "NO"
+                    "Parameters infected with SQL Injectioin": "NO Parametes Vulnerable"
                 }
             else:
                 lines = output.strip().split("\n")
@@ -74,7 +79,6 @@ def sql_injection_test(file_path):
             index+=1
 
         for res in results:
-            print("----")
             print(res)
 
 
@@ -83,4 +87,4 @@ def sql_injection_test(file_path):
 
 
 
-sql_injection_test("q.txt")
+sql_injection_test("q.txt","continueCode=gXWy6ZqWnJPaLzDVMr53wkbl7voAJlfprGY1jR8p6NemQXKg942BxOyEKr9q;cookieconsent_status=dismiss;language=en;PHPSESSID=cpueofe0a62t1pcd322c4i2l55;security=low;welcomebanner_status=dismiss")
