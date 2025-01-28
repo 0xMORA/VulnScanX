@@ -5,7 +5,7 @@ import urllib.parse
 from urllib.parse import urlparse, parse_qs
 #dalfox outputs the POC only so we decoded the payload
 
-def run_dalfox_on_url(url_file):
+def run_dalfox_on_url(url_file,ws):
     command = ["dalfox", "file", url_file]
 
     try:

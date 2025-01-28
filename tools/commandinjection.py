@@ -2,7 +2,7 @@ import subprocess
 import json
 import re
 
-async def run_commix_on_urls(url_file):
+async def run_commix_on_urls(url_file,ws):
     """
     Run Commix on a list of URLs, extract payloads, and convert results to JSON.
     """

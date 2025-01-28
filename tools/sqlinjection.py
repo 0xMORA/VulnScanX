@@ -3,7 +3,7 @@ import re
 import json
 
 
-def sql_injection_test(file_path,cookies="",level="",risk="",request_file=""):
+def sql_injection_test(file_path,ws,cookies="",level="",risk="",request_file=""):
     results = []
     command = ["sqlmap",
                "--flush-session",
