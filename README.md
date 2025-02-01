@@ -38,3 +38,18 @@ VulnScanX is a **web vulnerability scanner** designed to help developers and sec
    cd VulnScanX
    chmod +x setup.sh
    ./setup.sh
+2. Save the script to a file, e.g., install_vulnscanx.sh.
+3. Make the script executable:
+   ```bash
+   chmod +x install_vulnscanx.sh
+   ```
+4.Run the script:
+```bash
+./install_vulnscanx.sh
+```
+# After Installation:
+You can start the VulnScanX scanner by typing:
+```bash
+vulnscanx
+```
+### The web interface will be accessible at http://127.0.0.1:80
