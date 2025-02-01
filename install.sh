@@ -48,20 +48,13 @@ sudo apt-get update
 # Install Git if not installed
 install_tool "git" "sudo apt-get install -y git"
 
-# Clone the VulnScanX repository
-echo -e "${YELLOW}[+] Cloning VulnScanX repository...${NC}"
-git clone https://github.com/omarsamy10/VulnScanX.git ~/VulnScanX
-
-# Navigate to the VulnScanX directory
-cd ~/VulnScanX
-
 # Install Python3 and pip if not installed
 install_tool "python3" "sudo apt-get install -y python3"
 install_tool "pip3" "sudo apt-get install -y python3-pip"
 
 # Install Flask and other Python dependencies
-echo -e "${YELLOW}[+] Installing Python dependencies (Flask, Flask-Sockets, etc.)...${NC}"
-pip3 install flask flask-sockets gevent gevent-websocket urllib3 sqlmap
+echo -e "${YELLOW}[+] Installing Python dependencies (Flask, etc.)...${NC}"
+pip3 install flask gevent urllib3 --break-system-packages
 
 # Install required tools
 echo -e "${YELLOW}[+] Installing required tools...${NC}"
