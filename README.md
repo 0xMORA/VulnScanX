@@ -53,3 +53,5 @@ You can start the VulnScanX scanner by typing:
 vulnscanx
 ```
 ### The web interface will be accessible at http://127.0.0.1:80
+![screenshot](https://github.com/user-attachments/assets/76373347-a11f-4415-8315-4ca14193ce6e)
+
