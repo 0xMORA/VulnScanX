@@ -1,10 +1,10 @@
 import subprocess
-import json
 import re
+from .save_json_file import save_to_json
 
-def commandinjection(url_file, ws=None):
+def commandinjection(url_file):
     """
-    Run Commix on a list of URLs, extract parameters and payloads, and send results as JSON with WebSocket.
+    Run Commix on a list of URLs, extract parameters and payloads, and save results to a JSON file.
     """
     try:
         # Read URLs from the file
@@ -26,14 +26,14 @@ def commandinjection(url_file, ws=None):
             # Prepare the result data
             if result.returncode != 0:
                 print(f"Error testing {url}: {result.stderr}")
-                if ws:
-                    # Send an error as a vulnerability with a description
-                     ws.send(json.dumps({
-                        "vulnerability": "Command Injection",
-                        "severity": "Critical",
-                        "url": url,
-                        "description": f"Error encountered: {result.stderr}"
-                    }))
+                # Save an error as a vulnerability with a description
+                error_data = {
+                    "vulnerability": "Command Injection",
+                    "severity": "Critical",
+                    "url": url,
+                    "description": f"Error encountered: {result.stderr}"
+                }
+                save_to_json(error_data)
             else:
                 # Extract parameters and payloads
                 parameter_payload_pairs = []
@@ -52,17 +52,16 @@ def commandinjection(url_file, ws=None):
                             # Add the parameter-payload pair to the list
                             parameter_payload_pairs.append((parameter, payload))
 
-                # If parameter-payload pairs are found, send them as results
+                # If parameter-payload pairs are found, save them as results
                 if parameter_payload_pairs:
                     description = "\n".join([f"Parameter: {param}, Payload: {payload}" for param, payload in parameter_payload_pairs])
-                    result_data = {
+                    data = {
                         "vulnerability": "Command Injection",
                         "severity": "Critical",  # Fixed severity for command injection
                         "url": url,
                         "description": description
                     }
-                    if ws:
-                         ws.send(json.dumps(result_data))
+                    save_to_json(data)
 
     except Exception as e:
         error_data = {
@@ -71,6 +70,4 @@ def commandinjection(url_file, ws=None):
             "url": "N/A",
             "description": f"Error: {str(e)}"
         }
-        if ws:
-             ws.send(json.dumps(error_data))
-        return json.dumps(error_data, indent=4)
+        save_to_json(error_data)

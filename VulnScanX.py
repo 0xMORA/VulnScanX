@@ -1,15 +1,17 @@
-from flask import Flask, jsonify,render_template,redirect,url_for,request,session,flash
+from flask import Flask, jsonify,render_template,request
 import subprocess
 import json
 from tools import commandinjection,dalfox,sqlinjection
-from flask_sockets import Sockets
+import os
+
+
 
 flask_app=Flask(__name__)
 flask_app.secret_key="hello"
-sockets = Sockets(__name__)
 
 
 urls_path="urls.txt"
+scan_finished=False
 
 #homepage
 @flask_app.route("/",methods=["GET","POST"])
@@ -22,7 +24,6 @@ def home():
 # Start-scan route
 @flask_app.route("/start-scan", methods=["POST"])
 def start_scan():
-    global url,headers,scan_type,subdomain_enum,xss,sqli,commandinj
     url = request.form.get("url")
     headers = request.form.get("headers")
     scan_type = request.form.get("scan-type")
@@ -30,8 +31,14 @@ def start_scan():
     xss = request.form.get("xss") 
     sqli = request.form.get("sql-injection") 
     commandinj = request.form.get("command-injection") 
-       
-    return "Scan initiated."
+    try:
+        if scan_type == "full":
+            full_scan(url, headers)
+        elif scan_type == "custom":
+            custom_scan(url, headers, subdomain_enum, xss, sqli, commandinj)
+        return "Scan initiated."
+    except Exception as e:
+        return
 
 
 #results
@@ -39,36 +46,49 @@ def start_scan():
 def results():
             return render_template("results.html",
                                 title="/results")
+    
 
 
-# WebSocket endpoint to stream scan results
-@sockets.route("/results")
-def results(ws):
-    while not ws.closed:
-        if scan_type == "full":
-            full_scan(url,headers,ws)
-        elif scan_type == "custom":
-            custom_scan(url,headers,subdomain_enum,xss,sqli,commandinj,ws)
+@flask_app.route("/getresults", methods=["GET"])
+def get_results():
+    results_file = "vulnerabilities.json"
+    
+    if not os.path.exists(results_file):
+        return jsonify({"error": "Results file not found", "scan_finish": False})
+    
+    with open(results_file, "r") as file:
+        try:
+            data = json.load(file)
+        except json.JSONDecodeError:
+            return jsonify({"error": "Invalid JSON format", "scan_finish": False})
+
+    return jsonify({**data, "scan_finish": scan_finished})
 
 
 
-def full_scan(url,headers,ws):
+
+
+def full_scan(url,headers):
+    global scan_finished
     subdomain_enum=True
     recon(url,subdomain_enum)
-    dalfox(urls_path,ws)
-    commandinjection(urls_path,ws)
-    sqlinjection(urls_path,ws,headers,level="1",risk="1")
+    dalfox(urls_path)
+    commandinjection(urls_path)
+    sqlinjection(urls_path,headers,level="1",risk="1")
+    scan_finished=True
 
-def custom_scan(url,headers,subdomain_enum,xss,sqli,commandinj,ws):
 
+def custom_scan(url,headers,subdomain_enum,xss,sqli,commandinj):
+    global scan_finished
     recon(url,subdomain_enum)
 
     if(xss):
-        dalfox(urls_path,ws)
+        dalfox(urls_path)
     if(commandinj):
-        commandinjection(urls_path,ws)
+        commandinjection(urls_path)
     if(sqli):
-        sqlinjection(urls_path,ws,headers,level="1",risk="1")
+        sqlinjection(urls_path,headers,level="1",risk="1")
+    scan_finished=True
 
 
 #recon function is a bash script that automates subdomain enum & passive and active crawling     
@@ -100,4 +120,9 @@ def recon(url,subdomain_enum):
 
 
 if __name__=="__main__":
-    flask_app.run(host='127.0.0.1',port=80,debug=True)
+    from gevent.pywsgi import WSGIServer
+    from geventwebsocket.handler import WebSocketHandler
+
+    http_server = WSGIServer(('127.0.0.1', 80), flask_app, handler_class=WebSocketHandler)
+    http_server.serve_forever()
+
