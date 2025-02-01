@@ -82,11 +82,11 @@ def custom_scan(url,headers,subdomain_enum,xss,sqli,commandinj):
     global scan_finished
     recon(url,subdomain_enum)
 
-    if(xss):
+    if(xss =="on"):
         dalfox(urls_path)
-    if(commandinj):
+    if(commandinj =="on"):
         commandinjection(urls_path)
-    if(sqli):
+    if(sqli =="on"):
         sqlinjection(urls_path,headers,level="1",risk="1")
     scan_finished=True
 
