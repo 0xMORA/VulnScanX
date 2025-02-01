@@ -37,12 +37,11 @@ VulnScanX is a **web vulnerability scanner** designed to help developers and sec
    git clone https://github.com/your-username/VulnScanX.git
    cd VulnScanX
    ```
-2. Save the script to a file, e.g., install_vulnscanx.sh.
-3. Make the script executable:
+2. Make the script executable:
    ```bash
    chmod +x setup.sh
    ```
-4.Run the script:
+3.Run the script:
 ```bash
 ./setup.sh
 ```
