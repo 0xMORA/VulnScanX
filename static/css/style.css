@@ -197,3 +197,45 @@ footer nav a {
 footer nav a:hover {
   color: #6a11cb;
 }
+
+.custom-scan-columns {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.custom-scan-columns .column {
+  flex: 1;
+}
+
+/* Blog Posts Section */
+.blog-posts {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.blog-post-item {
+  background-color: #333;
+  margin-bottom: 15px;
+  padding: 15px;
+  border-radius: 8px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.blog-post-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(106, 17, 203, 0.3);
+}
+
+.blog-post-link {
+  color: #e0e0e0;
+  text-decoration: none;
+  font-size: 1.2rem;
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
+.blog-post-link:hover {
+  color: #6a11cb;
+}

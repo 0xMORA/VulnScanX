@@ -55,6 +55,7 @@ def commandinjection(url_file):
                 # If parameter-payload pairs are found, save them as results
                 if parameter_payload_pairs:
                     description = "\n".join([f"Parameter: {param}, Payload: {payload}" for param, payload in parameter_payload_pairs])
+                    description += "\nwhat you should do : http://127.0.0.1/blog?post=command-injection"
                     data = {
                         "vulnerability": "Command Injection",
                         "severity": "Critical",  # Fixed severity for command injection

@@ -7,7 +7,6 @@ import os
 
 
 flask_app=Flask(__name__)
-flask_app.secret_key="hello"
 
 
 urls_path="urls.txt"
@@ -26,16 +25,17 @@ def home():
 def start_scan():
     url = request.form.get("url")
     headers = request.form.get("headers")
-    scan_type = request.form.get("scan-type")
-    subdomain_enum = request.form.get("subdomain-enum")
-    xss = request.form.get("xss") 
-    sqli = request.form.get("sql-injection") 
-    commandinj = request.form.get("command-injection") 
+    scan_type = request.form.get("scan-type") 
     try:
         if scan_type == "full":
             full_scan(url, headers)
         elif scan_type == "custom":
-            custom_scan(url, headers, subdomain_enum, xss, sqli, commandinj)
+            subdomain_enum = request.form.get("subdomain-enum")
+            crawling=request.form.get("crawling")
+            xss = request.form.get("xss") 
+            sqli = request.form.get("sql-injection") 
+            commandinj = request.form.get("command-injection")
+            custom_scan(url, headers, subdomain_enum,crawling, xss, sqli, commandinj)
         return "Scan initiated."
     except Exception as e:
         return
@@ -46,6 +46,36 @@ def start_scan():
 def results():
             return render_template("results.html",
                                 title="/results")
+    
+
+
+
+#blog
+# List of available blog posts
+BLOG_POSTS = [
+    {"id": "command-injection", "title": "Command Injection"},
+    {"id": "sql-injection", "title": "SQL Injection"},
+    {"id": "xss", "title": "Cross-Site Scripting (XSS)"}
+]
+
+@flask_app.route("/blog", methods=["GET"])
+def blog():
+    # Check if a specific post is requested
+    if "post" in request.args:
+        post_id = request.args["post"]
+        # Render the corresponding post template
+        if post_id == "command-injection":
+            return render_template("command-injection.html", title="Command Injection")
+        elif post_id == "sql-injection":
+            return render_template("sql-injection.html", title="SQL Injection")
+        elif post_id == "xss":
+            return render_template("xss.html", title="XSS")
+        else:
+            return "Post not found", 404
+    else:
+        # Render the list of available posts
+        return render_template("blog.html", posts=BLOG_POSTS, title="Blog")
+            
     
 
 
@@ -78,9 +108,15 @@ def full_scan(url,headers):
     scan_finished=True
 
 
-def custom_scan(url,headers,subdomain_enum,xss,sqli,commandinj):
+def custom_scan(url,headers,subdomain_enum,crawling,xss,sqli,commandinj):
     global scan_finished
-    recon(url,subdomain_enum)
+    if crawling=="on" | subdomain_enum=="on":
+        recon(url,subdomain_enum)
+    else:
+        with open("urls.txt", "a") as file:
+            # Append the new URL to the file, followed by a newline
+            file.write(url + "\n")
+        
 
     if(xss =="on"):
         dalfox(urls_path)

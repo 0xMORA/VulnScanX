@@ -46,7 +46,7 @@ def run_dalfox_on_url(url_file):
                 "vulnerability": "XSS",
                 "severity": "Medium",  # Adjust severity as needed
                 "url": url,
-                "description": f"Vulnerable parameters: {vulnerabilities}"
+                "description": f"Vulnerable parameters: {vulnerabilities} \nwhat you should do : http://127.0.0.1/blog?post=xss"
             }
             save_to_json(vulnerability_data)
 

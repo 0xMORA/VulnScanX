@@ -30,42 +30,27 @@ def sql_injection_test(file_path, cookies="", level="", risk="", request_file=""
         outputs = [output.strip() for output in outputs]
 
         for index, output in enumerate(outputs):
-            if output == "":
-                vulnerability_data = {
-                    "vulnerability": "SQL Injection",
-                    "severity": "None",
-                    "url": urls[index],
-                    "description": "No parameters vulnerable"
-                }
-            else:
+            if output !="":
                 lines = output.strip().split("\n")
                 vulnerability_data = {
                     "vulnerability": "SQL Injection",
                     "severity": "High",  # Adjust severity as needed
                     "url": urls[index],
-                    "parameter": "",
-                    "method": "",
-                    "types": []
+                    "description":"",
                 }
 
-                current_type = {}
+                parameter=""
+                payloads=[]
+                # Parse the lines
                 for line in lines:
                     line = line.strip()
                     if line.startswith("Parameter:"):
                         parts = line.split(" ", 2)
-                        vulnerability_data["parameter"] = parts[1]
-                        vulnerability_data["method"] = parts[2].strip("()")
-                    elif line.startswith("Type:"):
-                        if current_type:
-                            vulnerability_data["types"].append(current_type)
-                        current_type = {"type": line.split(": ", 1)[1]}
-                    elif line.startswith("Title:"):
-                        current_type["title"] = line.split(": ", 1)[1]
+                        parameter = parts[1]
                     elif line.startswith("Payload:"):
-                        current_type["payload"] = line.split(": ", 1)[1]
-
-                if current_type:
-                    vulnerability_data["types"].append(current_type)
+                        payloads.append(line.split(": ", 1)[1])
+        
+                vulnerability_data["description"] = f'Vulnerable Parameters: {[{"parameter": parameter, "payloads": payloads[0]}]} what you should do : http://127.0.0.1/blog?post=sql-injection'
 
             save_to_json(vulnerability_data)
 

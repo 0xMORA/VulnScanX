@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Command Injection: Attack Scenarios and Mitigations</title>
+  <link rel="stylesheet" href="../static/css/code.css">
+</head>
+<body>
+  <header>
+    <h1>Command Injection: Attack Scenarios and Mitigations</h1>
+    <p>Learn how command injection attacks work and how to prevent them in web applications.</p>
+  </header>
+
+  <div class="container">
+    <section class="section">
+      <h2>What is Command Injection?</h2>
+      <p>
+        Command Injection is a critical security vulnerability that occurs when an attacker can execute arbitrary commands on the host operating system through a vulnerable application. This vulnerability typically arises when user input is improperly sanitized and passed to a system shell.
+      </p>
+      <p>
+        Attackers can exploit command injection to gain unauthorized access to sensitive data, compromise the server, or even take control of the entire system.
+      </p>
+    </section>
+
+    <section class="section">
+      <h2>Attack Scenarios</h2>
+      <p>
+        Below are some common attack scenarios where command injection vulnerabilities can be exploited in web applications:
+      </p>
+
+      <h3>Scenario 1: Vulnerable User Input in Python</h3>
+      <p>
+        Vulnerable Python code that uses <code>os.system</code> to execute user input:
+      </p>
+      <pre><code>import os
+
+user_input = input("Enter your name: ")
+os.system(f"echo Hello {user_input}")</code></pre>
+      <p>
+        This code is vulnerable to command injection, where an attacker could enter something like <code>; rm -rf /</code>, causing unwanted system commands to run.
+      </p>
+      
+      <h4>Fixed Version:</h4>
+      <p>
+        The fixed Python code uses <code>subprocess.run</code> for better security:
+      </p>
+      <pre><code>import subprocess
+
+user_input = input("Enter your name: ")
+subprocess.run(["echo", f"Hello {user_input}"], check=True)</code></pre>
+      <p>
+        The user input is safely handled as part of a list of arguments passed to <code>subprocess.run</code>, which avoids shell injection.
+      </p>
+
+      <h3>Scenario 2: Vulnerable PHP Script</h3>
+      <p>
+        Vulnerable PHP code that passes user input directly to <code>system</code>:
+      </p>
+      <pre><code>&lt;?php
+$user_input = $_GET['input'];
+system("echo " . $user_input);
+?&gt;</code></pre>
+      <p>
+        This code allows an attacker to execute arbitrary commands by sending input like <code>?input=; cat /etc/passwd</code>.
+      </p>
+      
+      <h4>Fixed Version:</h4>
+      <p>
+        The fixed PHP code uses <code>escapeshellarg</code> to sanitize the user input:
+      </p>
+      <pre><code>&lt;?php
+$user_input = escapeshellarg($_GET['input']);
+system("echo $user_input");
+?&gt;</code></pre>
+      <p>
+        The <code>escapeshellarg</code> function escapes any potentially dangerous characters in the input, preventing command injection.
+      </p>
+
+      <h3>Scenario 3: Node.js Command Injection</h3>
+      <p>
+        Vulnerable Node.js code using <code>exec</code> with user input:
+      </p>
+      <pre><code>const { exec } = require('child_process');
+const user_input = req.body.input;
+exec(`echo ${user_input}`);</code></pre>
+      <p>
+        An attacker could inject commands like <code>; ls -la</code> into the user input and execute unintended actions.
+      </p>
+      
+      <h4>Fixed Version:</h4>
+      <p>
+        The fixed Node.js code uses an array of arguments with <code>exec</code> to prevent injection:
+      </p>
+      <pre><code>const { exec } = require('child_process');
+const user_input = req.body.input;
+exec(["echo", user_input], (err, stdout, stderr) => {
+  if (err) {
+    console.error(err);
+    return;
+  }
+  console.log(stdout);
+});</code></pre>
+      <p>
+        By passing the user input as an array of arguments, we avoid directly embedding the input into the shell command, reducing the risk of command injection.
+      </p>
+    </section>
+
+    <section class="section">
+      <h2>Mitigation Strategies</h2>
+      <p>
+        To prevent command injection vulnerabilities, follow these best practices:
+      </p>
+      <ul>
+        <li><strong>Input Validation:</strong> Always validate and sanitize user input to ensure it does not contain malicious commands. Use allowlists to restrict input to known safe values.</li>
+        <li><strong>Use Safe APIs:</strong> Avoid passing user input directly to system shells. Use safer alternatives like <code>subprocess.run</code> in Python, <code>system</code> with escapeshellarg in PHP, or <code>exec</code> with an array of arguments in Node.js.</li>
+        <li><strong>Escape Shell Metacharacters:</strong> In PHP, use functions like <code>escapeshellcmd</code> and <code>escapeshellarg</code> to escape potentially dangerous characters.</li>
+      </ul>
+    </section>
+  </div>
+</body>
+</html>

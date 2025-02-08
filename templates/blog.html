@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='../static/css/style.css') }}">
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <h1>Blog</h1>
+        <p>Explore our latest posts on security vulnerabilities.</p>
+    </header>
+
+    <!-- Blog Posts Section -->
+    <section class="input-section">
+        <div class="container">
+            <h2>Available Posts</h2>
+            <ul class="blog-posts">
+                {% for post in posts %}
+                    <li class="blog-post-item">
+                        <a href="{{ url_for('blog', post=post.id) }}" class="blog-post-link">
+                            {{ post.title }}
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2023 Your Company. All rights reserved.</p>
+            <nav>
+                <a href="/">Home</a>
+                <a href="/blog">Blog</a>
+                <a href="/about">About</a>
+            </nav>
+        </div>
+    </footer>
+</body>
+</html>
