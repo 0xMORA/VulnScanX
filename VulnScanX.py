@@ -3,7 +3,7 @@ import subprocess
 import json
 from tools import commandinjection,dalfox,sqlinjection
 import os
-
+import threading
 
 
 flask_app=Flask(__name__)
@@ -27,7 +27,6 @@ def home():
 @flask_app.route("/start-scan", methods=["POST"])
 def start_scan():
     try:
-        # Parse JSON request body
         data = request.get_json()
         if not data:
             return jsonify({"error": "Invalid JSON data"}), 400
@@ -43,14 +42,18 @@ def start_scan():
 
         if not url or not scan_type:
             return jsonify({"error": "Missing required parameters"}), 400
-
-        # Run scan based on type
+        
+        # Run scan in a separate thread
         if scan_type == "full":
-            full_scan(url, headers)
+            scan_thread = threading.Thread(target=full_scan, args=(url, headers))
         elif scan_type == "custom":
-            custom_scan(url, headers, subdomain_enum, crawling, xss, sqli, commandinj)
+            scan_thread = threading.Thread(target=custom_scan, args=(url, headers, subdomain_enum, crawling, xss, sqli, commandinj))
+        else:
+            return jsonify({"error": "Invalid scan type"}), 400
 
-        return jsonify({"message": "Scan initiated."}), 200
+        scan_thread.start()
+
+        return jsonify({"message": "Scan started successfully. You can check the results later."}), 202
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500

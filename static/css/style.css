@@ -240,9 +240,17 @@ footer nav a:hover {
   color: #6a11cb;
 }
 
+  /* Ensure description text wraps properly */
 #results-table td:nth-child(4) {
-  max-width: 500px;
-  overflow: auto;
-  white-space: pre-wrap;
-  word-wrap: break-word;
-}
+    max-width: 500px;
+    overflow: auto;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+pre {
+    background: #1e1e1e;
+    color: #fff;
+    padding: 10px;
+    border-radius: 5px;
+    overflow-x: auto;
+  }
