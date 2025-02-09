@@ -108,8 +108,16 @@ def get_results():
         except json.JSONDecodeError:
             return jsonify({"error": "Invalid JSON format", "scan_finish": False})
 
-    return jsonify({**data, "scan_finish": scan_finished})
+    # If data is a list, wrap it in a dictionary
+    if isinstance(data, list):
+        response_data = {
+            "results": data,  # Wrap the list in a dictionary
+            "scan_finish": scan_finished
+        }
+    else:
+        response_data = {**data, "scan_finish": scan_finished}
 
+    return jsonify(response_data)
 
 
 
