@@ -2,7 +2,7 @@ import subprocess
 import re
 import urllib.parse
 from urllib.parse import urlparse, parse_qs
-from tools.save_json_file import save_to_json
+from .save_json_file import save_to_json
 #dalfox outputs the POC only so we decoded the payload
 
 def run_dalfox_on_url(url_file):
