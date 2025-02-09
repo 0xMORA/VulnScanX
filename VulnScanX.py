@@ -153,13 +153,6 @@ def recon(url,subdomain_enum):
         }    
 
 
-
-
-if __name__=="__main__":
-    from gevent.pywsgi import WSGIServer
-    from geventwebsocket.handler import WebSocketHandler
-    port=80
-    http_server = WSGIServer(('127.0.0.1', port), flask_app, handler_class=WebSocketHandler)
-    print(f"Server running on http://127.0.0.1:{port}")
-    http_server.serve_forever()
-
+# Run the app with debug mode
+if __name__ == '__main__':
+    flask_app.run(host='127.0.0.1', port=5000, debug=True)  # Enable debug mode here
