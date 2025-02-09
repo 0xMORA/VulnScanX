@@ -6,7 +6,7 @@ from .save_json_file import save_to_json
 #dalfox outputs the POC only so we decoded the payload
 
 def run_dalfox_on_url(url_file):
-    command = ["dalfox", "file", url_file]
+    command = ["dalfox", "file", f"../{url_file}"]
 
     try:
         result = subprocess.run(command, capture_output=True, text=True)
