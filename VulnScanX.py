@@ -155,4 +155,4 @@ def recon(url,subdomain_enum):
 
 # Run the app with debug mode
 if __name__ == '__main__':
-    flask_app.run(host='127.0.0.1', port=5000, debug=True)  # Enable debug mode here
+    flask_app.run(host='127.0.0.1', port=80, debug=True)  # Enable debug mode here
