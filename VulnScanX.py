@@ -26,15 +26,15 @@ def start_scan():
     url = request.form.get("url")
     headers = request.form.get("headers")
     scan_type = request.form.get("scan-type") 
+    subdomain_enum = request.form.get("subdomain-enum")
+    crawling=request.form.get("crawling")
+    xss = request.form.get("xss") 
+    sqli = request.form.get("sql-injection") 
+    commandinj = request.form.get("command-injection")
     try:
         if scan_type == "full":
             full_scan(url, headers)
         elif scan_type == "custom":
-            subdomain_enum = request.form.get("subdomain-enum")
-            crawling=request.form.get("crawling")
-            xss = request.form.get("xss") 
-            sqli = request.form.get("sql-injection") 
-            commandinj = request.form.get("command-injection")
             custom_scan(url, headers, subdomain_enum,crawling, xss, sqli, commandinj)
         return "Scan initiated."
     except Exception as e:
@@ -102,15 +102,15 @@ def full_scan(url,headers):
     global scan_finished
     subdomain_enum=True
     recon(url,subdomain_enum)
-    dalfox(urls_path)
-    commandinjection(urls_path)
-    sqlinjection(urls_path,headers,level="1",risk="1")
+    dalfox.run_dalfox_on_url(urls_path)
+    commandinjection.commandinjection(urls_path)
+    sqlinjection.sql_injection_test(urls_path,headers,level="1",risk="1")
     scan_finished=True
 
 
 def custom_scan(url,headers,subdomain_enum,crawling,xss,sqli,commandinj):
     global scan_finished
-    if crawling=="on" | subdomain_enum=="on":
+    if crawling=="on" or subdomain_enum=="on":
         recon(url,subdomain_enum)
     else:
         with open("urls.txt", "a") as file:
@@ -119,11 +119,11 @@ def custom_scan(url,headers,subdomain_enum,crawling,xss,sqli,commandinj):
         
 
     if(xss =="on"):
-        dalfox(urls_path)
+        dalfox.run_dalfox_on_url(urls_path)
     if(commandinj =="on"):
-        commandinjection(urls_path)
+        commandinjection.commandinjection(urls_path)
     if(sqli =="on"):
-        sqlinjection(urls_path,headers,level="1",risk="1")
+        sqlinjection.sql_injection_test(urls_path,headers,level="1",risk="1")
     scan_finished=True
 
 
@@ -158,7 +158,8 @@ def recon(url,subdomain_enum):
 if __name__=="__main__":
     from gevent.pywsgi import WSGIServer
     from geventwebsocket.handler import WebSocketHandler
-
-    http_server = WSGIServer(('127.0.0.1', 80), flask_app, handler_class=WebSocketHandler)
+    port=80
+    http_server = WSGIServer(('127.0.0.1', port), flask_app, handler_class=WebSocketHandler)
+    print(f"Server running on http://127.0.0.1:{port}")
     http_server.serve_forever()
 
