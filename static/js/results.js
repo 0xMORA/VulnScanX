@@ -8,13 +8,23 @@ function displayResult(result) {
     newRow.insertCell(2).innerHTML = `<a href="${result.url}" target="_blank">${result.url}</a>`;
 
     // Format the description for better readability
-    const formattedDesc = JSON.stringify(result.description, null, 2)
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;"); // Prevent XSS
+    const formattedDesc = formatDescription(result.description);
 
     const descCell = newRow.insertCell(3);
-    descCell.innerHTML = `<pre style="white-space: pre-wrap; word-wrap: break-word;">${formattedDesc}</pre>`;
+    descCell.innerHTML = `<div style="white-space: pre-wrap; word-wrap: break-word;">${formattedDesc}</div>`;
 }
+
+function formatDescription(description) {
+    return description
+        .replace(/\\n/g, "<br>") // Convert newlines to HTML line breaks
+        .replace(/\\\{'parameter': '.*?', 'payload': '.*?'\}\\]/g, "") // Remove raw JSON parts
+        .replace("what you should do :", "<strong>Recommended Action:</strong>") // Format action text
+        .replace(/\\x1b\[0m/g, "") // Remove terminal escape sequences
+        .replace(/</g, "&lt;") // Prevent XSS
+        .replace(/>/g, "&gt;") // Prevent XSS
+        .trim();
+}
+
 
 
 // Sort table by severity
