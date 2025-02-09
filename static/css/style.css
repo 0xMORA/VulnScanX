@@ -239,3 +239,10 @@ footer nav a:hover {
 .blog-post-link:hover {
   color: #6a11cb;
 }
+
+#results-table td:nth-child(4) {
+  max-width: 500px;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
