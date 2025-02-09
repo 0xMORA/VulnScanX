@@ -1,6 +1,6 @@
 import subprocess
 import re
-from .save_json_file import save_to_json
+from tools.save_json_file import save_to_json
 
 def sql_injection_test(file_path, cookies="", level="", risk="", request_file=""):
     command = [

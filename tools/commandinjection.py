@@ -1,6 +1,6 @@
 import subprocess
 import re
-from .save_json_file import save_to_json
+from tools.save_json_file import save_to_json
 
 def commandinjection(url_file):
     """
