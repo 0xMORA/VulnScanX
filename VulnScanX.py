@@ -127,10 +127,10 @@ def custom_scan(url,headers,subdomain_enum,crawling,xss,sqli,commandinj):
         recon(url,subdomain_enum)
     else:
         # Ensure the urls.txt file exists
-        if not os.path.exists(f"./tools/{urls_path}"):
-            with open(f"./tools/{urls_path}", "w") as file:
+        if not os.path.exists(urls_path):
+            with open(urls_path, "w") as file:
                 file.write("")  # Create an empty file
-        with open(f"./tools/{urls_path}", "a") as file:
+        with open(urls_path, "a") as file:
             # Append the new URL to the file, followed by a newline
             file.write(url + "\n")
         
