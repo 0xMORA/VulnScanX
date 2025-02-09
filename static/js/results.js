@@ -16,14 +16,17 @@ function displayResult(result) {
 
 function formatDescription(description) {
     return description
-        .replace(/\\n/g, "<br>") // Convert newlines to HTML line breaks
-        .replace(/\\\{'parameter': '.*?', 'payload': '.*?'\}\\]/g, "") // Remove raw JSON parts
-        .replace("what you should do :", "<strong>Recommended Action:</strong>") // Format action text
-        .replace(/\\x1b\[0m/g, "") // Remove terminal escape sequences
-        .replace(/</g, "&lt;") // Prevent XSS
-        .replace(/>/g, "&gt;") // Prevent XSS
+        .replace(/</g, "&lt;") // Escape `<` to prevent XSS
+        .replace(/>/g, "&gt;") // Escape `>` to prevent XSS
+        .replace(/"/g, "&quot;") // Escape double quotes
+        .replace(/'/g, "&#39;") // Escape single quotes
+        .replace(/\\n/g, "<br>") // Convert `\n` to `<br>` for readability
+        .replace(/&lt;strong&gt;(.*?)&lt;\/strong&gt;/g, "<strong>$1</strong>") // Keep <strong> tags
+        .replace("what you should do :", "<strong>Recommended Action:</strong>") // Keep this bold
+        .replace(/\\x1b\[0m/g, "") // Remove escape sequences
         .trim();
 }
+
 
 
 
