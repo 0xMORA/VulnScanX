@@ -23,22 +23,34 @@ def home():
 # Start-scan route
 @flask_app.route("/start-scan", methods=["POST"])
 def start_scan():
-    url = request.form.get("url")
-    headers = request.form.get("headers")
-    scan_type = request.form.get("scan-type") 
-    subdomain_enum = request.form.get("subdomain-enum")
-    crawling=request.form.get("crawling")
-    xss = request.form.get("xss") 
-    sqli = request.form.get("sql-injection") 
-    commandinj = request.form.get("command-injection")
     try:
+        # Parse JSON request body
+        data = request.get_json()
+        if not data:
+            return jsonify({"error": "Invalid JSON data"}), 400
+
+        url = data.get("url")
+        headers = data.get("headers")
+        scan_type = data.get("scan-type")
+        subdomain_enum = data.get("subdomain-enum")
+        crawling = data.get("crawling")
+        xss = data.get("xss")
+        sqli = data.get("sql-injection")
+        commandinj = data.get("command-injection")
+
+        if not url or not scan_type:
+            return jsonify({"error": "Missing required parameters"}), 400
+
+        # Run scan based on type
         if scan_type == "full":
             full_scan(url, headers)
         elif scan_type == "custom":
-            custom_scan(url, headers, subdomain_enum,crawling, xss, sqli, commandinj)
-        return "Scan initiated."
+            custom_scan(url, headers, subdomain_enum, crawling, xss, sqli, commandinj)
+
+        return jsonify({"message": "Scan initiated."}), 200
+
     except Exception as e:
-        return
+        return jsonify({"error": str(e)}), 500
 
 
 #results
