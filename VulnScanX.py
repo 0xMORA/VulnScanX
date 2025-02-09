@@ -10,6 +10,9 @@ flask_app=Flask(__name__)
 
 
 urls_path="urls.txt"
+
+# Get the absolute path
+absolute_path = os.path.abspath(urls_path)
 scan_finished=False
 
 #homepage
@@ -115,9 +118,9 @@ def full_scan(url,headers):
     global scan_finished
     subdomain_enum=True
     recon(url,subdomain_enum)
-    dalfox.run_dalfox_on_url(urls_path)
-    commandinjection.commandinjection(urls_path)
-    sqlinjection.sql_injection_test(urls_path,headers,level="1",risk="1")
+    dalfox.run_dalfox_on_url(absolute_path)
+    commandinjection.commandinjection(absolute_path)
+    sqlinjection.sql_injection_test(absolute_path,headers,level="1",risk="1")
     scan_finished=True
 
 
@@ -136,11 +139,11 @@ def custom_scan(url,headers,subdomain_enum,crawling,xss,sqli,commandinj):
         
 
     if(xss =="on"):
-        dalfox.run_dalfox_on_url(urls_path)
+        dalfox.run_dalfox_on_url(absolute_path)
     if(commandinj =="on"):
-        commandinjection.commandinjection(urls_path)
+        commandinjection.commandinjection(absolute_path)
     if(sqli =="on"):
-        sqlinjection.sql_injection_test(urls_path,headers,level="1",risk="1")
+        sqlinjection.sql_injection_test(absolute_path,headers,level="1",risk="1")
     scan_finished=True
 
 

@@ -4,9 +4,8 @@ import json
 import urllib.parse
 from urllib.parse import urlparse, parse_qs
 
-print("dalfox.py has been imported!")  # This should print when imported
 
-def save_to_json(vulnerability, filename="../vulnerabilities.json"):
+def save_to_json(vulnerability, filename="vulnerabilities.json"):
     """
     Appends a vulnerability to a JSON file.
 

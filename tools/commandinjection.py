@@ -2,7 +2,7 @@ import subprocess
 import re
 import json
 
-def save_to_json(vulnerability, filename="../vulnerabilities.json"):
+def save_to_json(vulnerability, filename="vulnerabilities.json"):
     """
     Appends a vulnerability to a JSON file.
 
