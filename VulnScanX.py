@@ -118,6 +118,7 @@ def full_scan(url,headers):
     commandinjection.commandinjection(urls_path)
     sqlinjection.sql_injection_test(urls_path,headers,level="1",risk="1")
     scan_finished=True
+    os.remove(f"./tools/{urls_path}")
 
 
 def custom_scan(url,headers,subdomain_enum,crawling,xss,sqli,commandinj):
@@ -125,13 +126,8 @@ def custom_scan(url,headers,subdomain_enum,crawling,xss,sqli,commandinj):
     if crawling=="on" or subdomain_enum=="on":
         recon(url,subdomain_enum)
     else:
-        # Ensure the urls.txt file exists
-        if not os.path.exists(f"./tools/{urls_path}"):
-            with open(f"./tools/{urls_path}", "w") as file:
-                file.write("")  # Create an empty file
-        with open(f"./tools/{urls_path}", "a") as file:
-            # Append the new URL to the file, followed by a newline
-            file.write(url + "\n")
+        with open(f"./tools/{urls_path}", "w") as file:
+            file.write(url + "\n")  # Create an empty file
         
 
     if(xss =="on"):
@@ -141,6 +137,7 @@ def custom_scan(url,headers,subdomain_enum,crawling,xss,sqli,commandinj):
     if(sqli =="on"):
         sqlinjection.sql_injection_test(urls_path,headers,level="1",risk="1")
     scan_finished=True
+    os.remove(f"./tools/{urls_path}")
 
 
 #recon function is a bash script that automates subdomain enum & passive and active crawling     
