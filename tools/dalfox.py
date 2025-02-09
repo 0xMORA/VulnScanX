@@ -1,6 +1,5 @@
 import subprocess
 import re
-import json
 import urllib.parse
 from urllib.parse import urlparse, parse_qs
 from .save_json_file import save_to_json

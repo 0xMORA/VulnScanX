@@ -113,7 +113,11 @@ def custom_scan(url,headers,subdomain_enum,crawling,xss,sqli,commandinj):
     if crawling=="on" or subdomain_enum=="on":
         recon(url,subdomain_enum)
     else:
-        with open("urls.txt", "a") as file:
+        # Ensure the urls.txt file exists
+        if not os.path.exists(urls_path):
+            with open(urls_path, "w") as file:
+                file.write("")  # Create an empty file
+        with open(urls_path, "a") as file:
             # Append the new URL to the file, followed by a newline
             file.write(url + "\n")
         
@@ -137,7 +141,7 @@ def recon(url,subdomain_enum):
 
         # Run the bash script
         result = subprocess.run(
-            ["/tools/automate.sh"] + url +sub,  # Path to the bash script
+            ["./tools/automate.sh"] + url +sub,  # Path to the bash script
             capture_output=True,  # Capture stdout and stderr
             text=True,            # Return output as a string
             check=True            # Raise an error if the script fails
