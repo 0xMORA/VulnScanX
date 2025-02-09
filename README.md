@@ -34,7 +34,7 @@ VulnScanX is a **web vulnerability scanner** designed to help developers and sec
 ### Steps
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-username/VulnScanX.git
+   git clone https://github.com/omarsamy10/VulnScanX.git
    cd VulnScanX
    ```
 2. Make the script executable:
