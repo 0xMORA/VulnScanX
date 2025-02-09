@@ -4,6 +4,8 @@ import json
 import urllib.parse
 from urllib.parse import urlparse, parse_qs
 
+print("dalfox.py has been imported!")  # This should print when imported
+
 def save_to_json(vulnerability, filename="../vulnerabilities.json"):
     """
     Appends a vulnerability to a JSON file.
@@ -28,7 +30,6 @@ def save_to_json(vulnerability, filename="../vulnerabilities.json"):
 
 
 #dalfox outputs the POC only so we decoded the payload
-
 def run_dalfox_on_url(url_file):
     command = ["dalfox", "file", url_file]
 
@@ -84,3 +85,4 @@ def run_dalfox_on_url(url_file):
         }
         save_to_json(error_data)
 
+run_dalfox_on_url("urls.txt")
