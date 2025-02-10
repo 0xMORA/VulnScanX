@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Advanced XSS Vulnerability Examples: JavaScript and PHP</title>
+  <link rel="stylesheet" href="../static/css/code.css">
+</head>
+<body>
+  <header>
+    <h1>Advanced XSS Vulnerability Examples: JavaScript and PHP</h1>
+    <p>
+      Detailed advanced examples of reflected, stored, and DOM-based XSS vulnerabilities in both JavaScript and PHP—including vulnerable implementations and secure fixes.
+    </p>
+  </header>
+
+  <div class="container">
+    <!-- Advanced XSS in JavaScript -->
+    <section class="section">
+      <h2>Advanced XSS Examples in JavaScript</h2>
+
+      <!-- Advanced Reflected XSS in JavaScript -->
+      <h3>1. Advanced Reflected XSS in JavaScript</h3>
+      <p>
+        This example simulates a search results page where user input is directly reflected in the output. Attackers can craft a URL (e.g., <code>?q=&lt;script&gt;alert('XSS')&lt;/script&gt;</code>) that injects malicious code.
+      </p>
+      <h4>Vulnerable Version:</h4>
+      <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;title>Search Page - Vulnerable Reflected XSS&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1&gt;Search Results&lt;/h1&gt;
+  &lt;div id="results"&gt;&lt;/div&gt;
+  &lt;script&gt;
+    // Extract query parameter 'q' from URL
+    const params = new URLSearchParams(window.location.search);
+    const query = params.get('q');
+    // Vulnerable: directly inserting unsanitized user input into innerHTML
+    document.getElementById('results').innerHTML =
+      "You searched for: " + query + "<br>Results: " + performSearch(query);
+    
+    function performSearch(term) {
+      // Simulated search function returning HTML content
+      return "Result for <b>" + term + "</b>";
+    }
+  &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+      <h4>Fixed Version:</h4>
+      <p>
+        The secure version uses safe DOM methods and manual encoding to prevent any injected scripts from executing.
+      </p>
+      <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;title>Search Page - Secured Reflected XSS&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1&gt;Search Results&lt;/h1&gt;
+  &lt;div id="results"&gt;&lt;/div&gt;
+  &lt;script&gt;
+    const params = new URLSearchParams(window.location.search);
+    const query = params.get('q') || "";
+    const resultsDiv = document.getElementById('results');
+    
+    // Create a paragraph element and set its text content
+    const searchInfo = document.createElement('p');
+    searchInfo.textContent = "You searched for: " + query;
+    resultsDiv.appendChild(searchInfo);
+    
+    // For the simulated search result, ensure any dynamic text is safely encoded
+    function performSafeSearch(term) {
+      // Replace < and > with HTML entities
+      return "Result for <b>" + term.replace(/</g, "&lt;").replace(/>/g, "&gt;") + "</b>";
+    }
+    const resultPara = document.createElement('p');
+    // If the search result contains safe HTML from a trusted source, you might use innerHTML;
+    // otherwise, use textContent. Here we assume the wrapping HTML is safe.
+    resultPara.innerHTML = "Results: " + performSafeSearch(query);
+    resultsDiv.appendChild(resultPara);
+  &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+
+      <!-- Advanced Stored XSS in JavaScript using LocalStorage -->
+      <h3>2. Advanced Stored XSS in JavaScript (Using localStorage)</h3>
+      <p>
+        In this example, comments are stored in <code>localStorage</code> and later rendered on the page. Without proper sanitization, an attacker can inject a script that will execute whenever the comments are viewed.
+      </p>
+      <h4>Vulnerable Version:</h4>
+      <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;title>Comment Board - Vulnerable Stored XSS&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1&gt;Comment Board&lt;/h1&gt;
+  &lt;form id="commentForm"&gt;
+    &lt;input type="text" id="comment" placeholder="Enter comment"&gt;
+    &lt;button type="submit"&gt;Submit&lt;/button&gt;
+  &lt;/form&gt;
+  &lt;div id="comments"&gt;&lt;/div&gt;
+  
+  &lt;script&gt;
+    // Load stored comments from localStorage
+    let comments = JSON.parse(localStorage.getItem('comments')) || [];
+    const commentsDiv = document.getElementById('comments');
+    comments.forEach(function(comment) {
+      let p = document.createElement('p');
+      // Vulnerable: inserting unsanitized comment as HTML
+      p.innerHTML = comment;
+      commentsDiv.appendChild(p);
+    });
+    
+    document.getElementById('commentForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      let newComment = document.getElementById('comment').value;
+      comments.push(newComment);
+      localStorage.setItem('comments', JSON.stringify(comments));
+      let p = document.createElement('p');
+      p.innerHTML = newComment;
+      commentsDiv.appendChild(p);
+    });
+  &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+      <h4>Fixed Version:</h4>
+      <p>
+        By rendering comments as plain text, the browser treats any HTML tags as text rather than executable code.
+      </p>
+      <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;title>Comment Board - Secured Stored XSS&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1&gt;Comment Board&lt;/h1&gt;
+  &lt;form id="commentForm"&gt;
+    &lt;input type="text" id="comment" placeholder="Enter comment"&gt;
+    &lt;button type="submit"&gt;Submit&lt;/button&gt;
+  &lt;/form&gt;
+  &lt;div id="comments"&gt;&lt;/div&gt;
+  
+  &lt;script&gt;
+    let comments = JSON.parse(localStorage.getItem('comments')) || [];
+    const commentsDiv = document.getElementById('comments');
+    comments.forEach(function(comment) {
+      let p = document.createElement('p');
+      // Secure: use textContent to avoid executing embedded HTML
+      p.textContent = comment;
+      commentsDiv.appendChild(p);
+    });
+    
+    document.getElementById('commentForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      let newComment = document.getElementById('comment').value;
+      comments.push(newComment);
+      localStorage.setItem('comments', JSON.stringify(comments));
+      let p = document.createElement('p');
+      p.textContent = newComment;
+      commentsDiv.appendChild(p);
+    });
+  &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+
+      <!-- Advanced DOM-Based XSS in JavaScript -->
+      <h3>3. Advanced DOM-Based XSS in JavaScript</h3>
+      <p>
+        In a DOM-based XSS attack, the client-side script directly uses data from the URL (e.g., the hash) to modify the page’s DOM. An attacker might pass a malicious payload in the URL fragment.
+      </p>
+      <h4>Vulnerable Version:</h4>
+      <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;title>Dynamic Profile - Vulnerable DOM XSS&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1&gt;User Profile&lt;/h1&gt;
+  &lt;div id="profile"&gt;&lt;/div&gt;
+  &lt;script&gt;
+    // Get parameters from URL hash (e.g., #name=John&bio=&lt;script&gt;alert('XSS')&lt;/script&gt;)
+    const hash = window.location.hash.substring(1);
+    const params = new URLSearchParams(hash);
+    const name = params.get('name') || 'Guest';
+    const bio = params.get('bio') || 'No bio provided';
+    
+    // Vulnerable: unsanitized insertion into innerHTML
+    document.getElementById('profile').innerHTML =
+      "&lt;h2&gt;" + name + "&lt;/h2&gt;&lt;p&gt;" + bio + "&lt;/p&gt;";
+  &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+      <h4>Fixed Version:</h4>
+      <p>
+        Using safe DOM methods like <code>createTextNode</code> or setting <code>textContent</code> ensures that injected data is rendered as plain text.
+      </p>
+      <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;title>Dynamic Profile - Secured DOM XSS&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1&gt;User Profile&lt;/h1&gt;
+  &lt;div id="profile"&gt;&lt;/div&gt;
+  &lt;script&gt;
+    const hash = window.location.hash.substring(1);
+    const params = new URLSearchParams(hash);
+    const name = params.get('name') || 'Guest';
+    const bio = params.get('bio') || 'No bio provided';
+    
+    const profileDiv = document.getElementById('profile');
+    const nameElem = document.createElement('h2');
+    nameElem.textContent = name;
+    const bioElem = document.createElement('p');
+    bioElem.textContent = bio;
+    
+    profileDiv.appendChild(nameElem);
+    profileDiv.appendChild(bioElem);
+  &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+    </section>
+
+    <!-- Advanced XSS in PHP -->
+    <section class="section">
+      <h2>Advanced XSS Examples in PHP</h2>
+
+      <!-- Advanced Reflected XSS in PHP -->
+      <h3>1. Advanced Reflected XSS in PHP</h3>
+      <p>
+        This PHP example simulates a search functionality where a query parameter is reflected in the output. An attacker can inject HTML or JavaScript into the response.
+      </p>
+      <h4>Vulnerable Version:</h4>
+      <pre><code>&lt;?php
+// File: search.php
+$query = $_GET['q'] ?? '';
+echo "&lt;h1&gt;Search Results&lt;/h1&gt;";
+echo "&lt;p&gt;You searched for: $query&lt;/p&gt;";
+
+function search($term) {
+  // Vulnerable: directly embedding user input in HTML
+  return "Found result for <b>$term</b>";
+}
+echo "&lt;div&gt;" . search($query) . "&lt;/div&gt;";
+?&gt;
+</code></pre>
+      <h4>Fixed Version:</h4>
+      <p>
+        Using <code>htmlspecialchars</code> ensures that any user-supplied content is safely encoded before output.
+      </p>
+      <pre><code>&lt;?php
+$query = $_GET['q'] ?? '';
+echo "&lt;h1&gt;Search Results&lt;/h1&gt;";
+echo "&lt;p&gt;You searched for: " . htmlspecialchars($query, ENT_QUOTES, 'UTF-8') . "&lt;/p&gt;";
+
+function search($term) {
+  // Secure: encode user input before embedding it in HTML
+  return "Found result for <b>" . htmlspecialchars($term, ENT_QUOTES, 'UTF-8') . "</b>";
+}
+echo "&lt;div&gt;" . search($query) . "&lt;/div&gt;";
+?&gt;
+</code></pre>
+
+      <!-- Advanced Stored XSS in PHP -->
+      <h3>2. Advanced Stored XSS in PHP</h3>
+      <p>
+        In this example, user comments stored in a simulated database are output on the page without proper sanitization, enabling stored XSS.
+      </p>
+      <h4>Vulnerable Version:</h4>
+      <pre><code>&lt;?php
+// Simulated database retrieval
+$comments = [
+  "&lt;script&gt;alert('XSS')&lt;/script&gt;",
+  "This is a normal comment."
+];
+
+echo "&lt;h1&gt;User Comments&lt;/h1&gt;";
+foreach ($comments as $comment) {
+  // Vulnerable: direct output without encoding
+  echo "&lt;p&gt;$comment&lt;/p&gt;";
+}
+?&gt;
+</code></pre>
+      <h4>Fixed Version:</h4>
+      <p>
+        By applying <code>htmlspecialchars</code> to each comment, any malicious scripts are rendered inert.
+      </p>
+      <pre><code>&lt;?php
+$comments = [
+  "&lt;script&gt;alert('XSS')&lt;/script&gt;",
+  "This is a normal comment."
+];
+
+echo "&lt;h1&gt;User Comments&lt;/h1&gt;";
+foreach ($comments as $comment) {
+  echo "&lt;p&gt;" . htmlspecialchars($comment, ENT_QUOTES, 'UTF-8') . "&lt;/p&gt;";
+}
+?&gt;
+</code></pre>
+
+      <!-- Advanced DOM-Based XSS in PHP -->
+      <h3>3. Advanced DOM-Based XSS in PHP</h3>
+      <p>
+        While DOM-based XSS is primarily a client-side concern, PHP can inadvertently enable it by embedding unsanitized user data into JavaScript. Here, a PHP variable is injected directly into a script block.
+      </p>
+      <h4>Vulnerable Version:</h4>
+      <pre><code>&lt;?php
+// File: dashboard.php
+$data = $_GET['data'] ?? '';
+?&gt;
+&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;title>Dashboard - Vulnerable Embedded XSS&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1&gt;Dashboard&lt;/h1&gt;
+  &lt;div id="output"&gt;&lt;/div&gt;
+  &lt;script&gt;
+    // Vulnerable: unsanitized PHP variable is embedded into JavaScript
+    var userData = "<?php echo $data; ?>";
+    document.getElementById('output').innerHTML = "User Data: " + userData;
+  &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+      <h4>Fixed Version:</h4>
+      <p>
+        Using <code>json_encode</code> to safely pass PHP data to JavaScript ensures that any special characters are properly escaped.
+      </p>
+      <pre><code>&lt;?php
+$data = $_GET['data'] ?? '';
+?&gt;
+&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;title>Dashboard - Secured Embedded XSS&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1&gt;Dashboard&lt;/h1&gt;
+  &lt;div id="output"&gt;&lt;/div&gt;
+  &lt;script&gt;
+    // Secure: using json_encode to safely embed PHP data into JavaScript
+    var userData = <?php echo json_encode($data); ?>;
+    document.getElementById('output').textContent = "User Data: " + userData;
+  &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+    </section>
+
+    <!-- Mitigation Strategies -->
+    <section class="section">
+      <h2>Mitigation Strategies for XSS</h2>
+      <p>
+        To safeguard your applications from XSS vulnerabilities:
+      </p>
+      <ul>
+        <li><strong>Input Validation and Sanitization:</strong> Validate all incoming data and use allowlists when possible.</li>
+        <li><strong>Output Encoding:</strong> Encode user-supplied data before rendering it (e.g., using <code>htmlspecialchars</code> in PHP or text nodes in JavaScript).</li>
+        <li><strong>Content Security Policy (CSP):</strong> Implement a strong CSP to restrict executable sources.</li>
+        <li><strong>Use Secure Frameworks:</strong> Leverage frameworks that include built-in security features and automatic escaping.</li>
+      </ul>
+    </section>
+  </div>
+</body>
+</html>
