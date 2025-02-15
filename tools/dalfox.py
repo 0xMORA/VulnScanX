@@ -4,6 +4,7 @@ import json
 import os
 import urllib.parse
 from urllib.parse import urlparse, parse_qs
+import html  # Import the html module for HTML encoding
 
 
 # Function to save vulnerabilities to JSON file
@@ -62,6 +63,7 @@ def run_dalfox_on_url(url_file,url_directory):
             for param, payloads in query_params.items():
                 for payload in payloads:
                     decoded_payload = urllib.parse.unquote(payload)  # Decode payload
+                    encoded_payload = html.escape(decoded_payload)  # HTML encode the payload 
                     findings[base_url].append({
                         "parameter": param,
                         "payload": decoded_payload
