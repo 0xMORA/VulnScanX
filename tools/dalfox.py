@@ -8,14 +8,18 @@ import html  # Import the html module for HTML encoding
 
 
 # Function to save vulnerabilities to JSON file
+import os
+import json
+
 def save_to_json(vulnerability, directory):
     """
-    Appends a vulnerability to a JSON file inside the specified directory.
+    Appends a vulnerability to a JSON file inside the specified directory if it's not already present.
 
     :param vulnerability: A dictionary containing vulnerability details.
     :param directory: The directory where the JSON file will be saved.
     """
     filename = os.path.join(directory, "vulnerabilities.json")
+    
     try:
         # Try to load existing data from the file
         with open(filename, "r") as file:
@@ -24,7 +28,7 @@ def save_to_json(vulnerability, directory):
         # If the file doesn't exist, initialize with an empty list
         data = []
 
-    # Append the new vulnerability if it's not already in the list
+    # Check if the vulnerability is already in the list
     if vulnerability not in data:
         data.append(vulnerability)
 
@@ -66,7 +70,7 @@ def run_dalfox_on_url(url_file,url_directory):
                     encoded_payload = html.escape(decoded_payload)  # HTML encode the payload 
                     findings[base_url].append({
                         "parameter": param,
-                        "payload": decoded_payload
+                        "payload": encoded_payload
                     })
 
         for url, vulnerabilities in findings.items():
@@ -77,6 +81,7 @@ def run_dalfox_on_url(url_file,url_directory):
                 "description": f"Vulnerable parameters: {vulnerabilities} \n <strong>Recommended Action : <a href=\"http://127.0.0.1/blog?post=xss\"> XSS Blog </a></strong>"
             }
             save_to_json(vulnerability_data,url_directory)
+            return # stop after finding first payload 
 
     except FileNotFoundError:
         error_data = {

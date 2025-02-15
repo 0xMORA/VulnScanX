@@ -5,6 +5,7 @@ from tools import commandinjection, dalfox, sqlinjection
 import os
 import threading
 import argparse
+from urllib.parse import urlparse
 
 # Initialize Flask app
 flask_app = Flask(__name__)
@@ -57,8 +58,14 @@ def start_scan():
             return jsonify({"error": "Missing required parameters"}), 400
         
         # Create a directory for the URL target inside the scans directory
-        url_directory = os.path.join("scans", url.replace("/", "_").replace(":", "_"))
-        # Convert it to an absolute path and make it 
+        # Extract the domain from the URL
+        parsed_url = urlparse(url)
+        domain = parsed_url.netloc  # This will give 'target.com' for 'https://target.com'
+
+        # Create a directory for the URL target inside the scans directory
+        url_directory = os.path.join("scans", domain)
+
+        # Convert it to an absolute path and create the directory
         url_directory = os.path.abspath(url_directory)
         os.makedirs(url_directory, exist_ok=True)
 
@@ -81,11 +88,13 @@ def start_scan():
 def get_results():
     # Get the target URL from the query parameters
     url = request.args.get("url")
+    parsed_url = urlparse(url)
+    url = parsed_url.netloc
     if not url:
         return jsonify({"error": "URL parameter is required"}), 400
 
     # Create the target directory name by replacing special characters
-    url_directory = os.path.join("scans", url.replace("/", "_").replace(":", "_"))
+    url_directory = os.path.join("scans", url)
 
     # Path to the vulnerabilities.json file inside the target directory
     results_file = os.path.join(url_directory, "vulnerabilities.json")

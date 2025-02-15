@@ -3,14 +3,18 @@ import re
 import os
 import json
 
+import os
+import json
+
 def save_to_json(vulnerability, directory):
     """
-    Appends a vulnerability to a JSON file inside the specified directory.
+    Appends a vulnerability to a JSON file inside the specified directory if it's not already present.
 
     :param vulnerability: A dictionary containing vulnerability details.
     :param directory: The directory where the JSON file will be saved.
     """
     filename = os.path.join(directory, "vulnerabilities.json")
+    
     try:
         # Try to load existing data from the file
         with open(filename, "r") as file:
@@ -19,7 +23,7 @@ def save_to_json(vulnerability, directory):
         # If the file doesn't exist, initialize with an empty list
         data = []
 
-    # Append the new vulnerability if it's not already in the list
+    # Check if the vulnerability is already in the list
     if vulnerability not in data:
         data.append(vulnerability)
 
@@ -75,6 +79,7 @@ def sql_injection_test(file_path,url_directory , cookies="", level="", risk="", 
                         parameter = parts[1]
                     elif line.startswith("Payload:"):
                         payloads.append(line.split(": ", 1)[1])
+                    break
         
                 vulnerability_data["description"] = f'Vulnerable Parameters: {[{"parameter": parameter, "payloads": payloads[0]}]} <strong>Recommended Action : <a href=\"http://127.0.0.1/blog?post=sql-injection\"> sql injection Blog </a></strong>'
 

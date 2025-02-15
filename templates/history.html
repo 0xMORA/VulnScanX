@@ -32,7 +32,7 @@
                             <ul>
                                 {% for vuln in scan.vulnerabilities %}
                                 <li>
-                                    <strong>{{ vuln.type }}</strong> ({{ vuln.severity }}): {{ vuln.description }}
+                                    <strong>{{ vuln.type }}</strong> ({{ vuln.severity }}): {{ vuln.description|safe }}
                                 </li>
                                 {% endfor %}
                             </ul>

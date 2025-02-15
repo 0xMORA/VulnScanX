@@ -3,14 +3,18 @@ import re
 import os
 import json
 
+import os
+import json
+
 def save_to_json(vulnerability, directory):
     """
-    Appends a vulnerability to a JSON file inside the specified directory.
+    Appends a vulnerability to a JSON file inside the specified directory if it's not already present.
 
     :param vulnerability: A dictionary containing vulnerability details.
     :param directory: The directory where the JSON file will be saved.
     """
     filename = os.path.join(directory, "vulnerabilities.json")
+    
     try:
         # Try to load existing data from the file
         with open(filename, "r") as file:
@@ -19,7 +23,7 @@ def save_to_json(vulnerability, directory):
         # If the file doesn't exist, initialize with an empty list
         data = []
 
-    # Append the new vulnerability if it's not already in the list
+    # Check if the vulnerability is already in the list
     if vulnerability not in data:
         data.append(vulnerability)
 
@@ -77,6 +81,7 @@ def commandinjection(url_file,url_directory):
 
                             # Add the parameter-payload pair to the list
                             parameter_payload_pairs.append((parameter, payload))
+                        break
 
                 # If parameter-payload pairs are found, save them as results
                 if parameter_payload_pairs:
