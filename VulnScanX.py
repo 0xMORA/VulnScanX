@@ -88,38 +88,59 @@ def start_scan():
 def get_results():
     # Get the target URL from the query parameters
     url = request.args.get("url")
-    parsed_url = urlparse(url)
-    url = parsed_url.netloc
     if not url:
         return jsonify({"error": "URL parameter is required"}), 400
 
-    # Create the target directory name by replacing special characters
-    url_directory = os.path.join("scans", url)
+    # Parse the URL and extract the netloc (domain)
+    parsed_url = urlparse(url)
+    url_directory = os.path.join("scans", parsed_url.netloc)
 
     # Path to the vulnerabilities.json file inside the target directory
     results_file = os.path.join(url_directory, "vulnerabilities.json")
-    
+
     # Check if the results file exists
     if not os.path.exists(results_file):
         return jsonify({"error": "Results file not found for the specified URL", "scan_finish": False})
-    
-    # Read the results file
-    with open(results_file, "r") as file:
-        try:
-            data = json.load(file)
-        except json.JSONDecodeError:
-            return jsonify({"error": "Invalid JSON format in results file", "scan_finish": False})
 
-    # If data is a list, wrap it in a dictionary
+    # Read and parse the results file
+    try:
+        with open(results_file, "r") as file:
+            data = json.load(file)
+    except json.JSONDecodeError:
+        return jsonify({"error": "Invalid JSON format in results file", "scan_finish": False})
+
+    # Remove redundancy from the results
+    def remove_redundancy(results):
+        unique_results = []
+        seen = set()
+
+        for result in results:
+            # Create a unique key based on type, url, and description
+            result_key = (result.get("type"), result.get("url"), result.get("description"))
+
+            if result_key not in seen:
+                seen.add(result_key)
+                unique_results.append(result)
+
+        return unique_results
+
+    # Ensure data is a list (handle both list and dictionary formats)
     if isinstance(data, list):
-        response_data = {
-            "results": data,  # Wrap the list in a dictionary
-            "scan_finish": scan_finished
-        }
+        results = data
     else:
-        response_data = {**data, "scan_finish": scan_finished}
+        results = data.get("results", [])
+
+    # Remove redundancy from the results
+    unique_results = remove_redundancy(results)
+
+    # Prepare the response data
+    response_data = {
+        "results": unique_results,
+        "scan_finish": scan_finished
+    }
 
     return jsonify(response_data)
+
 
 # Results route
 @flask_app.route("/results", methods=["GET", "POST"])

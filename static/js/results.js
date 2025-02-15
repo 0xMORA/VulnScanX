@@ -3,7 +3,7 @@ function displayResult(result) {
     const resultsTable = document.getElementById('results-table').getElementsByTagName('tbody')[0];
     const newRow = resultsTable.insertRow();
 
-    newRow.insertCell(0).textContent = result.type; // Changed from result.vulnerability to result.type
+    newRow.insertCell(0).textContent = result.vulnerability; 
     newRow.insertCell(1).textContent = result.severity;
     newRow.insertCell(2).innerHTML = `<a href="${result.url}" target="_blank">${result.url}</a>`; // Added URL field
 
