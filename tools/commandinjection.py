@@ -1,14 +1,16 @@
 import subprocess
 import re
+import os
 import json
 
-def save_to_json(vulnerability, filename="vulnerabilities.json"):
+def save_to_json(vulnerability, directory):
     """
-    Appends a vulnerability to a JSON file.
+    Appends a vulnerability to a JSON file inside the specified directory.
 
     :param vulnerability: A dictionary containing vulnerability details.
-    :param filename: The name of the JSON file to save the data.
+    :param directory: The directory where the JSON file will be saved.
     """
+    filename = os.path.join(directory, "vulnerabilities.json")
     try:
         # Try to load existing data from the file
         with open(filename, "r") as file:
@@ -17,14 +19,16 @@ def save_to_json(vulnerability, filename="vulnerabilities.json"):
         # If the file doesn't exist, initialize with an empty list
         data = []
 
-    # Append the new vulnerability
-    data.append(vulnerability)
+    # Append the new vulnerability if it's not already in the list
+    if vulnerability not in data:
+        data.append(vulnerability)
 
     # Save the updated data back to the file
     with open(filename, "w") as file:
         json.dump(data, file, indent=4)
 
-def commandinjection(url_file):
+
+def commandinjection(url_file,url_directory):
     """
     Run Commix on a list of URLs, extract parameters and payloads, and save results to a JSON file.
     """
@@ -55,7 +59,7 @@ def commandinjection(url_file):
                     "url": url,
                     "description": f"Error encountered: {result.stderr}"
                 }
-                save_to_json(error_data)
+                save_to_json(error_data,url_directory)
             else:
                 # Extract parameters and payloads
                 parameter_payload_pairs = []
@@ -77,14 +81,14 @@ def commandinjection(url_file):
                 # If parameter-payload pairs are found, save them as results
                 if parameter_payload_pairs:
                     description = "\n".join([f"Parameter: {param}, Payload: {payload}" for param, payload in parameter_payload_pairs])
-                    description += "\nwhat you should do : http://127.0.0.1/blog?post=command-injection"
+                    description += "\n <strong>Recommended Action : <a href=\"http://127.0.0.1/blog?post=command-injection\"> command injection Blog </a></strong>"
                     data = {
                         "vulnerability": "Command Injection",
                         "severity": "Critical",  # Fixed severity for command injection
                         "url": url,
                         "description": description
                     }
-                    save_to_json(data)
+                    save_to_json(data,url_directory)
 
     except Exception as e:
         error_data = {
@@ -93,5 +97,5 @@ def commandinjection(url_file):
             "url": "N/A",
             "description": f"Error: {str(e)}"
         }
-        save_to_json(error_data)
+        save_to_json(error_data,url_directory)
 

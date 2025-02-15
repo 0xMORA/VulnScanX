@@ -16,10 +16,6 @@ function displayResult(result) {
 
 function formatDescription(description) {
     return description
-        .replace(/</g, "&lt;") // Escape `<` to prevent XSS
-        .replace(/>/g, "&gt;") // Escape `>` to prevent XSS
-        .replace(/"/g, "&quot;") // Escape double quotes
-        .replace(/'/g, "&#39;") // Escape single quotes
         .replace(/\\n/g, "<br>") // Convert `\n` to `<br>` for readability
         .replace(/&lt;strong&gt;(.*?)&lt;\/strong&gt;/g, "<strong>$1</strong>") // Keep <strong> tags
         .replace("what you should do :", "<strong>Recommended Action:</strong>") // Keep this bold

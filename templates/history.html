@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scan History</title>
+    <link rel="stylesheet" href="../static/css/style.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Scan History</h1>
+            <p>View the history of scans and discovered vulnerabilities.</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <section class="results-section">
+            <h2>Scan History</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>URL</th>
+                        <th>Vulnerabilities</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for scan in scan_history %}
+                    <tr>
+                        <td>{{ scan.url }}</td>
+                        <td>
+                            <ul>
+                                {% for vuln in scan.vulnerabilities %}
+                                <li>
+                                    <strong>{{ vuln.type }}</strong> ({{ vuln.severity }}): {{ vuln.description }}
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2023 VulnScanX. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>

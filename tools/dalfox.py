@@ -1,17 +1,20 @@
 import subprocess
 import re
 import json
+import os
 import urllib.parse
 from urllib.parse import urlparse, parse_qs
 
 
-def save_to_json(vulnerability, filename="vulnerabilities.json"):
+# Function to save vulnerabilities to JSON file
+def save_to_json(vulnerability, directory):
     """
-    Appends a vulnerability to a JSON file.
+    Appends a vulnerability to a JSON file inside the specified directory.
 
     :param vulnerability: A dictionary containing vulnerability details.
-    :param filename: The name of the JSON file to save the data.
+    :param directory: The directory where the JSON file will be saved.
     """
+    filename = os.path.join(directory, "vulnerabilities.json")
     try:
         # Try to load existing data from the file
         with open(filename, "r") as file:
@@ -20,16 +23,16 @@ def save_to_json(vulnerability, filename="vulnerabilities.json"):
         # If the file doesn't exist, initialize with an empty list
         data = []
 
-    # Append the new vulnerability
-    data.append(vulnerability)
+    # Append the new vulnerability if it's not already in the list
+    if vulnerability not in data:
+        data.append(vulnerability)
 
     # Save the updated data back to the file
     with open(filename, "w") as file:
         json.dump(data, file, indent=4)
 
-
 #dalfox outputs the POC only so we decoded the payload
-def run_dalfox_on_url(url_file):
+def run_dalfox_on_url(url_file,url_directory):
     command = ["dalfox", "file", url_file]
 
     try:
@@ -40,7 +43,7 @@ def run_dalfox_on_url(url_file):
             error_data = {
                 "error": f"Dalfox execution failed: {result.stderr}"
             }
-            save_to_json(error_data)
+            save_to_json(error_data,url_directory)
             return
 
         for line in result.stdout.splitlines():
@@ -69,19 +72,19 @@ def run_dalfox_on_url(url_file):
                 "vulnerability": "XSS",
                 "severity": "Medium",  # Adjust severity as needed
                 "url": url,
-                "description": f"Vulnerable parameters: {vulnerabilities} \nwhat you should do : http://127.0.0.1/blog?post=xss"
+                "description": f"Vulnerable parameters: {vulnerabilities} \n <strong>Recommended Action : <a href=\"http://127.0.0.1/blog?post=xss\"> XSS Blog </a></strong>"
             }
-            save_to_json(vulnerability_data)
+            save_to_json(vulnerability_data,url_directory)
 
     except FileNotFoundError:
         error_data = {
             "error": f"File not found: {url_file}"
         }
-        save_to_json(error_data)
+        save_to_json(error_data,url_directory)
     except Exception as e:
         error_data = {
             "error": str(e)
         }
-        save_to_json(error_data)
+        save_to_json(error_data,url_directory)
 
-run_dalfox_on_url("urls.txt")
+

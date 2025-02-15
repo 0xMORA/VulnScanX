@@ -1,14 +1,16 @@
 import subprocess
 import re
+import os
 import json
 
-def save_to_json(vulnerability, filename="vulnerabilities.json"):
+def save_to_json(vulnerability, directory):
     """
-    Appends a vulnerability to a JSON file.
+    Appends a vulnerability to a JSON file inside the specified directory.
 
     :param vulnerability: A dictionary containing vulnerability details.
-    :param filename: The name of the JSON file to save the data.
+    :param directory: The directory where the JSON file will be saved.
     """
+    filename = os.path.join(directory, "vulnerabilities.json")
     try:
         # Try to load existing data from the file
         with open(filename, "r") as file:
@@ -17,14 +19,16 @@ def save_to_json(vulnerability, filename="vulnerabilities.json"):
         # If the file doesn't exist, initialize with an empty list
         data = []
 
-    # Append the new vulnerability
-    data.append(vulnerability)
+    # Append the new vulnerability if it's not already in the list
+    if vulnerability not in data:
+        data.append(vulnerability)
 
     # Save the updated data back to the file
     with open(filename, "w") as file:
         json.dump(data, file, indent=4)
+    
 
-def sql_injection_test(file_path, cookies="", level="", risk="", request_file=""):
+def sql_injection_test(file_path,url_directory , cookies="", level="", risk="", request_file=""):
     command = [
         "sqlmap",
         "--flush-session",
@@ -72,12 +76,12 @@ def sql_injection_test(file_path, cookies="", level="", risk="", request_file=""
                     elif line.startswith("Payload:"):
                         payloads.append(line.split(": ", 1)[1])
         
-                vulnerability_data["description"] = f'Vulnerable Parameters: {[{"parameter": parameter, "payloads": payloads[0]}]} what you should do : http://127.0.0.1/blog?post=sql-injection'
+                vulnerability_data["description"] = f'Vulnerable Parameters: {[{"parameter": parameter, "payloads": payloads[0]}]} <strong>Recommended Action : <a href=\"http://127.0.0.1/blog?post=sql-injection\"> sql injection Blog </a></strong>'
 
-            save_to_json(vulnerability_data)
+            save_to_json(vulnerability_data,url_directory)
 
     except Exception as error:
         error_data = {
             "error": str(error)
         }
-        save_to_json(error_data)
+        save_to_json(error_data,url_directory)
