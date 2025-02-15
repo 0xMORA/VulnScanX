@@ -77,10 +77,71 @@ def start_scan():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@flask_app.route("/getresults", methods=["GET"])
+def get_results():
+    # Get the target URL from the query parameters
+    url = request.args.get("url")
+    if not url:
+        return jsonify({"error": "URL parameter is required"}), 400
+
+    # Create the target directory name by replacing special characters
+    url_directory = os.path.join("scans", url.replace("/", "_").replace(":", "_"))
+
+    # Path to the vulnerabilities.json file inside the target directory
+    results_file = os.path.join(url_directory, "vulnerabilities.json")
+    
+    # Check if the results file exists
+    if not os.path.exists(results_file):
+        return jsonify({"error": "Results file not found for the specified URL", "scan_finish": False})
+    
+    # Read the results file
+    with open(results_file, "r") as file:
+        try:
+            data = json.load(file)
+        except json.JSONDecodeError:
+            return jsonify({"error": "Invalid JSON format in results file", "scan_finish": False})
+
+    # If data is a list, wrap it in a dictionary
+    if isinstance(data, list):
+        response_data = {
+            "results": data,  # Wrap the list in a dictionary
+            "scan_finish": scan_finished
+        }
+    else:
+        response_data = {**data, "scan_finish": scan_finished}
+
+    return jsonify(response_data)
+
 # Results route
 @flask_app.route("/results", methods=["GET", "POST"])
 def results():
     return render_template("results.html", title="/results")
+
+
+# Blog route
+BLOG_POSTS = [
+    {"id": "command-injection", "title": "Command Injection"},
+    {"id": "sql-injection", "title": "SQL Injection"},
+    {"id": "xss", "title": "Cross-Site Scripting (XSS)"}
+]
+
+@flask_app.route("/blog", methods=["GET"])
+def blog():
+    # Check if a specific post is requested
+    if "post" in request.args:
+        post_id = request.args["post"]
+        # Render the corresponding post template
+        if post_id == "command-injection":
+            return render_template("command-injection.html", title="Command Injection")
+        elif post_id == "sql-injection":
+            return render_template("sql-injection.html", title="SQL Injection")
+        elif post_id == "xss":
+            return render_template("xss.html", title="XSS")
+        else:
+            return "Post not found", 404
+    else:
+        # Render the list of available posts
+        return render_template("blog.html", posts=BLOG_POSTS, title="Blog")
 
 # History route
 @flask_app.route("/history", methods=["GET"])

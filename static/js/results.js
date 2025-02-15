@@ -3,9 +3,9 @@ function displayResult(result) {
     const resultsTable = document.getElementById('results-table').getElementsByTagName('tbody')[0];
     const newRow = resultsTable.insertRow();
 
-    newRow.insertCell(0).textContent = result.vulnerability;
+    newRow.insertCell(0).textContent = result.type; // Changed from result.vulnerability to result.type
     newRow.insertCell(1).textContent = result.severity;
-    newRow.insertCell(2).innerHTML = `<a href="${result.url}" target="_blank">${result.url}</a>`;
+    newRow.insertCell(2).innerHTML = `<a href="${result.url}" target="_blank">${result.url}</a>`; // Added URL field
 
     // Format the description for better readability
     const formattedDesc = formatDescription(result.description);
@@ -17,14 +17,9 @@ function displayResult(result) {
 function formatDescription(description) {
     return description
         .replace(/\\n/g, "<br>") // Convert `\n` to `<br>` for readability
-        .replace(/&lt;strong&gt;(.*?)&lt;\/strong&gt;/g, "<strong>$1</strong>") // Keep <strong> tags
-        .replace("what you should do :", "<strong>Recommended Action:</strong>") // Keep this bold
         .replace(/\\x1b\[0m/g, "") // Remove escape sequences
         .trim();
 }
-
-
-
 
 // Sort table by severity
 function sortTableBySeverity() {
@@ -32,7 +27,7 @@ function sortTableBySeverity() {
     const tbody = table.getElementsByTagName('tbody')[0];
     const rows = Array.from(tbody.getElementsByTagName('tr'));
 
-    const severityOrder = { 'High': 3, 'Medium': 2, 'Low': 1 };
+    const severityOrder = { 'Critical': 4, 'High': 3, 'Medium': 2, 'Low': 1 }; // Added 'Critical' severity
 
     rows.sort((a, b) => severityOrder[b.cells[1].textContent] - severityOrder[a.cells[1].textContent]);
 
@@ -113,8 +108,18 @@ function removeLoadingSpinner() {
 function getResults() {
     addLoadingSpinner(); // Show spinner while waiting for results
 
+    // Get the URL parameter from the query string
+    const urlParams = new URLSearchParams(window.location.search);
+    const targetUrl = urlParams.get('url');
+
+    if (!targetUrl) {
+        console.error('URL parameter is missing');
+        removeLoadingSpinner();
+        return;
+    }
+
     const interval = setInterval(() => {
-        fetch('/getresults')
+        fetch(`/getresults?url=${encodeURIComponent(targetUrl)}`) // Pass the target URL as a query parameter
             .then(response => response.json())
             .then(data => {
                 if (data.scan_finish) {
@@ -130,7 +135,7 @@ function getResults() {
                 console.error('Error fetching results:', error);
                 removeLoadingSpinner(); // Hide spinner on error
             });
-    }, 5000);
+    }, 5000); // Poll every 5 seconds
 }
 
 // Initialize polling when on /results page

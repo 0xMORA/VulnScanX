@@ -18,15 +18,19 @@ document.getElementById('scan-form').addEventListener('submit', function(event) 
         },
         body: JSON.stringify(jsonObject)
     })
-    .then(response => response.text())
+    .then(response => response.json()) // Parse the response as JSON
     .then(data => {
-        if (data) {
-            // Redirect to the results page 
-            window.location.href = `/results`;
+        if (data.message) {
+            // Redirect to the results page with the URL parameter
+            const targetUrl = jsonObject.url; // Get the URL from the form data
+            window.location.href = `/results?url=${encodeURIComponent(targetUrl)}`;
+        } else if (data.error) {
+            // Display an error message if the scan failed
+            alert(`Error: ${data.error}`);
         }
     })
     .catch(error => {
         console.error('Error starting scan:', error);
+        alert('An error occurred while starting the scan. Please try again.');
     });
 });
-
