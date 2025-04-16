@@ -84,6 +84,7 @@ def start_scan():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+# getresults route 
 @flask_app.route("/getresults", methods=["GET"])
 def get_results():
     # Get the target URL from the query parameters
