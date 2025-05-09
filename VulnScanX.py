@@ -1,5 +1,4 @@
 from flask import Flask, jsonify, render_template, request
-import subprocess
 import json
 from tools import commandinjection, dalfox, sqlinjection ,autorecon
 import os
