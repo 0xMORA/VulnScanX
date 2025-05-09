@@ -1,7 +1,7 @@
 from flask import Flask, jsonify, render_template, request
 import subprocess
 import json
-from tools import commandinjection, dalfox, sqlinjection
+from tools import commandinjection, dalfox, sqlinjection ,autorecon
 import os
 import threading
 import argparse
@@ -201,7 +201,7 @@ def full_scan(url, headers,subdomain_enum, url_directory):
     # Phase 1: Run recon first with all threads
     recon_threads = []
     for _ in range(NUM_THREADS):
-        thread = threading.Thread(target=recon, args=(url, subdomain_enum,url_directory))
+        thread = threading.Thread(target=recon, args=(url, subdomain_enum,url_directory,headers))
         recon_threads.append(thread)
         thread.start()
 
@@ -248,7 +248,7 @@ def custom_scan(url, headers, subdomain_enum, crawling, xss, sqli, commandinj, u
     if crawling == "on" or subdomain_enum == "on":
         recon_threads = []
         for _ in range(NUM_THREADS):
-            thread = threading.Thread(target=recon, args=(url, subdomain_enum,url_directory))
+            thread = threading.Thread(target=recon, args=(url, subdomain_enum,url_directory,headers))
             recon_threads.append(thread)
             thread.start()
 
@@ -298,26 +298,41 @@ def custom_scan(url, headers, subdomain_enum, crawling, xss, sqli, commandinj, u
     scan_finished = True
 
 # Recon function
-def recon(url, subdomain_enum,url_directory):
+def recon(url, subdomain_enum, url_directory,headers=None):
+    """
+    Perform reconnaissance on a target URL, including optional subdomain enumeration
+    and endpoint crawling.
+    
+    Args:
+        url (str): Target URL or domain.
+        subdomain_enum (str): "on" to enable subdomain enumeration, else disabled.
+        url_directory (str): Directory to store output files.
+    
+    Returns:
+        dict: Results containing subdomains, endpoints, and any errors.
+    """
     try:
-        if subdomain_enum == "on":
-            sub = "-sub"
-        else:
-            sub = ""
-
-        result = subprocess.run(
-            ["./tools/automate.sh", url, url_directory, "-sub"],
-            capture_output=True,
-            text=True,
-            check=True
+        # Convert subdomain_enum to boolean
+        sub_enum = subdomain_enum.lower() == "on"
+        
+        # Call autorecon function
+        result = autorecon(
+            url=url,
+            subdomain_enum=sub_enum,
+            url_directory=url_directory,
+            headers=headers,  # Add custom headers if needed
+            max_pages=10,
+            threads=4
         )
-            
-    except subprocess.CalledProcessError as e:
+        
+        return result
+    
+    except Exception as e:
         return {
             "error": str(e),
-            "stdout": e.stdout,
-            "stderr": e.stderr,
-            "returncode": e.returncode
+            "subdomains": [],
+            "endpoints": [],
+            "returncode": 1
         }
 
 # Run the app with the specified port
