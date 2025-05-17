@@ -20,6 +20,7 @@ urls_path = os.path.join(scans_dir, "urls.txt")
 absolute_path = os.path.abspath(urls_path)
 scan_finished = False
 
+
 # Parse command-line arguments
 parser = argparse.ArgumentParser(description="Run VulnScanX with custom port and number of threads.")
 parser.add_argument("-p", "--port", type=int, default=80, help="Port to run the application on (default: 80)")
@@ -56,7 +57,6 @@ def start_scan():
         if not url or not scan_type:
             return jsonify({"error": "Missing required parameters"}), 400
         
-        # Create a directory for the URL target inside the scans directory
         # Extract the domain from the URL
         parsed_url = urlparse(url)
         domain = parsed_url.netloc  # This will give 'target.com' for 'https://target.com'

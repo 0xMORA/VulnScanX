@@ -1,5 +1,6 @@
 import os
 import requests
+import time
 
 def gemini(prompt):
     """Sends a request to the Gemini API to generate content based on the provided prompt."""
@@ -16,7 +17,6 @@ def gemini(prompt):
     }
 
     response = requests.post(url, headers=headers, json=data)
-
     if response.status_code == 200:
         result = response.json()
         ai_text = result["candidates"][0]["content"]["parts"][0]["text"]
@@ -24,3 +24,4 @@ def gemini(prompt):
     else:
         return f"Error {response.status_code}: {response.text}"
     
+

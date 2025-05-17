@@ -617,7 +617,24 @@ def active_subdomain_enum(domain):
 
 def autorecon(url, subdomain_enum=False, url_directory=None, headers=None, max_pages=10, threads=4):
     """Perform reconnaissance on a target URL with optional subdomain enumeration and crawling.
-    
+
+    Steps:
+    1. Display a banner to indicate the start of the reconnaissance process.
+    2. Validate the `url_directory` parameter; return an error if not provided.
+    3. Extract the domain from the input URL (or use the input as the domain if no scheme is present).
+    4. Set up a project directory based on `url_directory` and a subdomain directory for the target domain.
+    5. Initialize a result dictionary to store subdomains, endpoints, and errors.
+    6. If `subdomain_enum` is True:
+        - Perform passive subdomain enumeration using tools like amass, subfinder, and sublist3r.
+        - Filter live domains using httpx to identify reachable subdomains.
+        - Perform active subdomain enumeration using dnsrecon with a wordlist to discover additional subdomains.
+        - Store discovered subdomains in the result dictionary.
+    7. Crawl the target URL using a Selenium-based crawler to extract endpoints (URLs, methods, parameters, headers).
+    8. Save crawled endpoints to a JSON file (`endpoints.json`) in the `url_directory`.
+    9. Store endpoints in the result dictionary.
+    10. Return to the project directory and print completion message.
+    11. Return the result dictionary containing subdomains, endpoints, and any errors.
+
     Args:
         url (str): Target URL or domain.
         subdomain_enum (bool): Enable subdomain enumeration if True.
